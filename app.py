@@ -1,62 +1,99 @@
-import streamlit as st
-import qgis.core
-import qgis.gui
-import qgis.utils
-from qgis.PyQt.QtCore import QFileInfo
-from qgis.core import QgsProject, QgsRasterLayer
-from streamlit_folium import st_folium
+
 import folium
+# import rasterio
+# from rasterio.plot import show
+import numpy as np
+# import leafmap.foliumap as leafmap
+
+import tempfile
 import os
+import matplotlib.pyplot as plt
 
-# Initialisation de QGIS
-qgis.core.QgsApplication.setPrefixPath(os.environ['QGIS_PREFIX_PATH'], True)  # Remplacez par le chemin d'installation de QGIS
-qgis_app = qgis.core.QgsApplication([], False)
-qgis_app.initQgis()
 
-# Titre de l'application
-st.title("Visualisation de Températures Géographiques avec QGIS")
+# def file_uploader():
+#     """
+#     Function that initializes the expander in which the first map will be.
+#     Args: 
+#         json_gdf (dict): JSON object in which there are the coordinates of an uploaded shape file .
+#     Returns:
+#         output (dict) : It contains either the shape file coordiantes either the drawn shape ones
+#     """
+#     # Manage the file uploader
+#     uploaded_files = st.file_uploader("Choose a tif file", type=["tif", "tiff"], accept_multiple_files=True)
+#     if uploaded_files:
 
-# Téléchargement des fichiers TIF
-uploaded_files = st.file_uploader("Téléchargez vos fichiers TIF", type="tif", accept_multiple_files=True)
+#         st.write("Files uploaded successfully!")
+#         st.write(len(uploaded_files))
 
-# Initialisation de la carte Folium
-m = folium.Map(location=[0, 0], zoom_start=2)
+#         # Load the shapefile
+#         load_shapefile(uploaded_files)
 
-# Chargement et gestion des couches
-if uploaded_files:
-    layers = []
-    for uploaded_file in uploaded_files:
-        # Sauvegarder le fichier uploadé temporairement
-        with open(os.path.join("/tmp", uploaded_file.name), "wb") as f:
-            f.write(uploaded_file.getbuffer())
 
-        # Charger le fichier TIF en tant que couche QGIS
-        file_info = QFileInfo(os.path.join("/tmp", uploaded_file.name))
-        layer_name = file_info.baseName()
-        raster_layer = QgsRasterLayer(file_info.filePath(), layer_name)
+# def load_shapefile(uploaded_files):
+#     """
+#     Function to load a shape file and all its components, it needs at least the following list of 
+#     file : shp, shx, prj.
 
-        if not raster_layer.isValid():
-            st.error(f"Le fichier {uploaded_file.name} n'est pas un raster valide.")
-        else:
-            QgsProject.instance().addMapLayer(raster_layer)
-            layers.append(raster_layer)
+#     Args:
+#         uploaded_files (list) : List of uploaded shape files for a geometry
 
-    # Afficher les couches avec des cases à cocher
-    for layer in layers:
-        show_layer = st.checkbox(f"Afficher {layer.name()}", value=True)
-        if show_layer:
-            # Conversion de la couche QGIS en format compatible avec Folium (par exemple, GeoJSON, ou autre)
-            extent = layer.extent()
-            bounds = [[extent.yMinimum(), extent.xMinimum()], [extent.yMaximum(), extent.xMaximum()]]
-            folium.raster_layers.ImageOverlay(
-                name=layer.name(),
-                image=os.path.join("/tmp", layer.name() + ".tif"),
-                bounds=bounds,
-                opacity=0.6,
-            ).add_to(m)
+#     Returns:
+#         gdf (geopandas.GeoDataFrame): Geodataframe containing the geometry of the files
+#     """
+#     # Create a temporary directory
+#     with tempfile.TemporaryDirectory() as tmpdirname:
+#         # Save the uploaded files to the temporary directory
+#         for uploaded_file in uploaded_files:
+        
+#             file_path = os.path.join(tmpdirname, uploaded_file.name)
+#             with open(file_path, 'wb') as f:
+#                 f.write(uploaded_file.getbuffer())
+        
+       
+#         tif_file = [os.path.join(tmpdirname, f.name) for f in uploaded_files if f.name.endswith('.tif')][0]
 
-    folium.LayerControl().add_to(m)
-    st_folium(m, width=700, height=500)
+        
+#         # Read the shapefile
+#         with rasterio.open(tif_file) as src:
+#             # Read the data as a NumPy array
+#             data = src.read()
 
-# Terminer l'application QGIS
-qgis_app.exitQgis()
+#             # Display metadata
+#             print(src.meta)
+
+#             # Plot the data (assuming it's a single-band raster)
+#             show(data, cmap='gray')
+#             plt.show()
+       
+    
+
+# # Read a portion of the file to guess encoding
+# with open("C:/Users/FlorianBERGERE/Keran/Groupe_Huit_Interne - Stage-IA/Dataset/Bangui/Data/LCZ.tif", 'rb') as f:
+#     result = chardet.detect(f.read(1000))
+
+# print(result)     
+ 
+# with rasterio.open("C:/Users/FlorianBERGERE/Downloads/Tiff-Image-File-Download.tiff") as src:
+#     # Read the image data
+#     # Read the data
+#     data = src.read(1)  # Read the first band
+
+#     # Plot the data
+#     plt.imshow(data, cmap='gray')
+#     plt.colorbar()
+#     plt.title('Raster Data')
+#     plt.show()
+
+
+# Print some information about the dataset
+import matplotlib.pyplot as plt
+import rasterio
+
+# Charger le fichier raster
+with rasterio.open("C:/Users/FlorianBERGERE/Downloads/LST_32638.tif") as src:
+    raster = src.read(7)  # Lire la première bande
+
+# Afficher avec matplotlib
+plt.imshow(raster, cmap='jet')
+plt.colorbar()
+plt.show()
