@@ -1,4 +1,4 @@
 streamlit
 folium
 rasterio 
-geemap
+matplotlib

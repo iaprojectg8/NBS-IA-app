@@ -90,7 +90,7 @@ import matplotlib.pyplot as plt
 import rasterio
 
 # Charger le fichier raster
-with rasterio.open("C:/Users/FlorianBERGERE/Downloads/LST_32638.tif") as src:
+with rasterio.open("LST_32638.tif") as src:
     raster = src.read(7)  # Lire la première bande
 
 # Afficher avec matplotlib
