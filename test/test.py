@@ -88,7 +88,7 @@ import math
 p_non_def = 0.986  # 98.6%
 
 # Niveau de confiance souhaité (1% de risque que toutes les pièces soient non défectueuses)
-confiance = 0.01
+confiance = 0.02
 
 # Résolution de l'équation pour trouver n
 n = math.log(confiance) / math.log(p_non_def)

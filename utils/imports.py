@@ -13,6 +13,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm 
+import plotly.graph_objects as go
 
 import wandb
 

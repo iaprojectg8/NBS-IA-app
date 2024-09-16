@@ -36,49 +36,59 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
     percentages = well_predicted_counts / total_counts
     percentages = [0 if (percentage < 1e-5 or np.isnan(percentage)) else round(percentage, 2) for percentage in percentages]
 
-    fig = plt.figure(figsize=(13, 6))
-    fig.suptitle(title)
-    
-    ax1 = fig.add_subplot(1, 2, 1)
-    ax2 = fig.add_subplot(1, 2, 2)
+    # Create the first figure for distribution comparison
+    fig1 = go.Figure()
 
-    # Historgram for distribution comparison between ground truth and predicted values
-    ax1.hist([pred, y_test], bins=bins, color=['blue', 'green'], label=["Prediction", "Ground Truth"], alpha=0.7)
-    ax1.set_xlabel('Intervals')
-    ax1.set_ylabel('Count')
-    ax1.legend()
+    fig1.add_trace(go.Histogram(x=pred.flatten(), nbinsx=len(bins), name='Prediction', marker_color='blue', opacity=0.5, histnorm='probability'))
+    fig1.add_trace(go.Histogram(x=y_test.flatten(), nbinsx=len(bins), name='Ground Truth', marker_color='green', opacity=0.5, histnorm='probability'))
+
+    fig1.update_layout(
+        title=f"{title} - Distribution Comparison",
+        xaxis_title='Intervals',
+        yaxis_title='Probability',
+        barmode='overlay'
+    )
+
+    # Create the second figure for well-predicted and mispredicted values
+    fig2 = go.Figure()
 
     # Calculate the overall percentage of well-predicted values
     well_predicted_all = sum(well_predicted_counts) / sum(total_counts)
     
-    # Subplot for histogram of well-predicted and mispredicted values
-    ax2.hist([well_predicted_array, others], bins=bins, color=['green', 'red'], label=[
-        f"{well_predicted_all:.2f} of well predicted\nwith {threshold} precision", 
-        f"{1 - well_predicted_all:.2f} Mispredicted"], alpha=0.7, width=0.7, stacked=True)
-    ax2.set_xlabel('Intervals')
-    ax2.set_ylabel('Count')
-    ax2.legend()
+    fig2.add_trace(go.Histogram(x=well_predicted_array.flatten(), nbinsx=len(bins), name=f'{well_predicted_all:.2f} of well predicted\nwith {threshold} precision', marker_color='green', opacity=0.7))
+    fig2.add_trace(go.Histogram(x=others.flatten(), nbinsx=len(bins), name=f'{1 - well_predicted_all:.2f} Mispredicted', marker_color='red', opacity=0.7))
 
     # Annotate histogram with percentages
-    bin_centers = [bin + 0.3 for bin in bins]
+    bin_centers = [bin + 0.5 for bin in bins]  # Center of each bin
     for i, percentage in enumerate(percentages):
-        if percentage != 0: 
-            ax2.annotate(percentage, xy=(bin_centers[i], total_counts[i]), 
-                         xytext=(0, 5), textcoords='offset points', ha='center', color='black', fontsize=10)
-        else: 
-            ax2.annotate(percentage, xy=(bins[i], total_counts[i]), 
-                         xytext=(0, 5), textcoords='offset points', ha='center', color='black', fontsize=10)
+        if percentage != 0:
+            fig2.add_annotation(
+                x=bin_centers[i],
+                y=max(well_predicted_counts[i], total_counts[i]),  # Position on top of the bar
+                text=str(percentage),
+                showarrow=False,
+                font=dict(color='black', size=10),
+                align='center'
+            )
+    
+    fig2.update_layout(
+        title=f"{title} - Well Predicted vs Mispredicted",
+        xaxis_title='Intervals',
+        yaxis_title='Count',
+        barmode='stack'
+    )
 
-    
-    
-    plt.tight_layout()
+
+    # Display the figures in Streamlit
+    st.plotly_chart(fig1)
+    st.plotly_chart(fig2)
+
     if wandb_push:
-        wandb_title = title
-        wandb.log({wandb_title: wandb.Image(plt)})
-        plt.clf()
-    else:
-        plt.title(title)
-        plt.show()
+        import wandb
+        wandb.log({
+            f"{title} - Distribution Comparison": wandb.Image(fig1),
+            f"{title} - Well Predicted vs Mispredicted": wandb.Image(fig2)
+        })
 
 def visualization(classif,classes_to_temps,test_inputs,wandb_title, model): 
     """

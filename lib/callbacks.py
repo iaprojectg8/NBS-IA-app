@@ -1,5 +1,5 @@
 from utils.imports import *
 
 
-def whatever_callback():
-    return 0
+def callback_train():
+    st.session_state.train = 1

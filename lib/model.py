@@ -1,8 +1,8 @@
 from utils.imports import *
-from preprocessing import *
-from visualization import basic_visualization
+from lib.preprocessing import *
+from lib.visualization import basic_visualization
 
-def rdf_regressor(df,parameters_list, estimator):
+def rdf_regressor(X, y, estimator):
     """
     Performs a random forest regression.
 
@@ -14,8 +14,7 @@ def rdf_regressor(df,parameters_list, estimator):
     Returns:
         None. The function outputs visualizations of the results after applying rdf regression.
     """
-    X,y = create_X_y(df, parameters_list) 
-
+  
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2 , random_state=42)
     scaler = StandardScaler()
 

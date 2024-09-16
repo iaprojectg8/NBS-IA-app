@@ -1,18 +1,18 @@
 from utils.imports import *
-from utils.variables import REMAKE_FOLDER
+from utils.variables import REMAKE_FOLDER, DATAFRAME_HEIGHT
 
-def upload_files():
+def upload_files_raster_viz():
     """
     Handle file uploads from the user.
     Returns:
         List of uploaded files.
     """
-    st.title("Upload Raster Files")
+    st.subheader("Upload Raster or CSV Files")
     uploaded_files = st.file_uploader("Choose TIFF or CSV files", type=["tif", "tiff", "csv"], accept_multiple_files=True)
     return uploaded_files
 
 
-def manage_uploaded_files(raster_files):
+def manage_uploaded_files_raster_viz(raster_files):
     """
     Display the uploaded rasters on a map using leafmap.
     
@@ -46,13 +46,17 @@ def manage_uploaded_files(raster_files):
 
 
 
+
+
+
 def manage_csv(uploaded_file):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp_file:
         temp_file.write(uploaded_file.read())
         temp_file_path = temp_file.name
     df = pd.read_csv(temp_file_path)
 
-    st.dataframe(df)
+    st.subheader("Complete dataframe")
+    st.dataframe(df,height=DATAFRAME_HEIGHT)
     return df
 
 
@@ -138,3 +142,45 @@ def raster_vis(uploaded_file, map:leafmap):
         map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1)
     
     return map
+
+
+#################################### Training page part ##############################################
+
+def upload_train_file_model():
+    """
+    Handle file uploads from the user.
+    Returns:
+        List of uploaded files.
+    """
+    st.subheader("Upload a train CSV file")
+    uploaded_file = st.file_uploader("Choose CSV file", type=["csv"], accept_multiple_files=False)
+    return uploaded_file
+
+
+def upload_test_file_model():
+    """
+    Handle file uploads from the user.
+    Returns:
+        List of uploaded files.
+    """
+    st.title("Upload a train CSV file")
+    uploaded_file = st.file_uploader("Choose CSV file", type=["csv"], accept_multiple_files=False)
+    return uploaded_file
+
+def manage_uploaded_model(csv_file):
+    """
+    Display the uploaded rasters on a map using leafmap.
+    
+    Args:
+        raster_files (list): List of uploaded raster files.
+    """
+     
+    if csv_file.type=="application/vnd.ms-excel":
+        
+        df = manage_csv(uploaded_file=csv_file)
+        variable_list = ["LAT", "LON","LS1","LS2","LS3","LS4","LS5","LS6","OCCSOL","URB","ALT","EXP","PENTE","NATSOL","NATSOL2","HAUTA","CATHYD","ZONECL","ALB"]
+        selected_variables = st.multiselect("Chose the variable on which you want to train", options=variable_list,default=variable_list)
+
+    return df, selected_variables
+            
+
