@@ -1,5 +1,11 @@
 streamlit
 folium
-rasterio
 matplotlib
 leafmap
+sklearn
+scipy
+pyproj
+rasterio
+wandb
+geopandas
+numpy
