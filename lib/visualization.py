@@ -24,6 +24,7 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
 
     # Reshape predictions to match the shape of y_test
     pred = np.reshape(pred, y_test.shape)
+    print(len(pred))
     
     # Determine which predictions are within the threshold of the ground truth
     well_predicted = (abs(pred - y_test) <= threshold)
@@ -32,15 +33,28 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
 
     # Calculate the percentage of well-predicted values
     well_predicted_counts, _ = np.histogram(well_predicted_array, bins=bins)
+    print(len(well_predicted_counts))
     total_counts, _ = np.histogram(np.concatenate([well_predicted_array, others]), bins=bins)
+    print(len(total_counts))
     percentages = well_predicted_counts / total_counts
     percentages = [0 if (percentage < 1e-5 or np.isnan(percentage)) else round(percentage, 2) for percentage in percentages]
+    print(len(bins), len(percentages))
 
     # Create the first figure for distribution comparison
     fig1 = go.Figure()
 
-    fig1.add_trace(go.Histogram(x=pred.flatten(), nbinsx=len(bins), name='Prediction', marker_color='blue', opacity=0.5))
-    fig1.add_trace(go.Histogram(x=y_test.flatten(), nbinsx=len(bins), name='Ground Truth', marker_color='green', opacity=0.5))
+    fig1.add_trace(go.Histogram(
+        x=pred.flatten(), 
+        nbinsx=len(bins), 
+        name='Prediction', 
+        marker_color='blue', 
+        opacity=0.8))
+    fig1.add_trace(go.Histogram(
+        x=y_test.flatten(), 
+        nbinsx=len(bins), 
+        name='Ground Truth', 
+        marker_color='green', 
+        opacity=0.8))
 
     fig1.update_layout(
         title=f"{title} - Distribution Comparison",
@@ -62,23 +76,37 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
 
     # Calculate the overall percentage of well-predicted values
     well_predicted_all = sum(well_predicted_counts) / sum(total_counts)
+    font_color = "white"
+    fig2.add_trace(go.Histogram(
+        x=well_predicted_array.flatten(), 
+        nbinsx=len(bins), 
+        name=f'{well_predicted_all:.2f} of well predicted \nwith {threshold} precision', 
+        marker_color='green', 
+        opacity=1))
     
-    fig2.add_trace(go.Histogram(x=well_predicted_array.flatten(), nbinsx=len(bins), name=f'{well_predicted_all:.2f} of well predicted \nwith {threshold} precision', marker_color='green', opacity=0.7))
-    fig2.add_trace(go.Histogram(x=others.flatten(), nbinsx=len(bins), name=f'{1 - well_predicted_all:.2f} Mispredicted', marker_color='red', opacity=0.7))
+    fig2.add_trace(go.Histogram(
+        x=others.flatten(), 
+        nbinsx=len(bins), 
+        name=f'{1 - well_predicted_all:.2f} Mispredicted',
+        marker_color='red', 
+        text=[percentage for percentage in percentages],
+        textposition='auto',
+        textfont=dict(color=f"{font_color}",weight=90,shadow="auto"),
+        opacity=1))
 
     # Annotate histogram with percentages
     bin_centers = [bin + 0.5 for bin in bins]  # Center of each bin
    
-    for i, percentage in enumerate(percentages):
-        if percentage != 0:
-            fig2.add_annotation(
-                x=bin_centers[i],
-                y= max(5,max(well_predicted_counts[i], total_counts[i])-8),  # Position on top of the bar
-                text=str(percentage),
-                showarrow=False,
-                font=dict(color='white', size=len(bin_centers)/2),
-                align='center'
-            )
+    # for i, percentage in enumerate(percentages):
+    #     if percentage != 0:
+    #         fig2.add_annotation(
+    #             x=bin_centers[i],
+    #             y= max(5,max(well_predicted_counts[i], total_counts[i])-8),  # Position on top of the bar
+    #             text=str(percentage),
+    #             showarrow=False,
+    #             font=dict(color='white', size=len(bin_centers)/2),
+    #             align='center'
+    #         )
     
     fig2.update_layout(
         title=f"{title} - Well Predicted vs Mispredicted",

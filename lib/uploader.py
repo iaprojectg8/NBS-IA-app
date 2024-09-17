@@ -163,7 +163,7 @@ def upload_test_file_model():
     Returns:
         List of uploaded files.
     """
-    st.title("Upload a train CSV file")
+    st.subheader("Upload a test CSV file")
     uploaded_file = st.file_uploader("Choose CSV file", type=["csv"], accept_multiple_files=False)
     return uploaded_file
 

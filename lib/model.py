@@ -1,6 +1,8 @@
 from utils.imports import *
 from lib.preprocessing import *
 from lib.visualization import basic_visualization
+from utils.variables import SAVE_PATH
+from lib.callbacks import *
 
 def rdf_regressor(X, y, estimator):
     """
@@ -47,3 +49,28 @@ def adjusted_r2_calc(r2, X_test):
     print(n)
     adjusted_r2 = 1 - ((1 - r2) * (n - 1)) / ( n - k- 1)
     return adjusted_r2
+
+
+def save_model(model):
+    
+        
+    
+    st.text_input("Folder path", key='input_path',value=st.session_state.input_path, on_change=update_file_path)
+        
+    # with col2:
+    #     st.button("Save path", on_click=save_download_path)
+
+    st.button("Save model", on_click=callback_save)
+    st.button("Exit", on_click=callback_exit)
+    
+
+
+def update_file_path():
+    """
+    Function to update the folder path to download the drive files, when the user update it
+    Args: 
+        None
+    Returns:
+        None
+    """
+    st.session_state.model_path = st.session_state.input_path
