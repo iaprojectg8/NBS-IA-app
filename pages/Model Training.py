@@ -33,11 +33,12 @@ uploaded_files = upload_train_file_model()
 if uploaded_files:
     print(uploaded_files)
     df, selected_variables = manage_uploaded_model(uploaded_files)
-    df = df.sample(100000)
+    df = df.sample(10000)
     X,y = create_X_y(df,selected_variables)
+    estimator = st.number_input(label="Amount of estimators (trees)", min_value=1, max_value=150, value=25)
     st.button("Train a model", on_click=callback_train)
     if st.session_state.train:
         
-        rdf_regressor(X, y, estimator=25)
+        rdf_regressor(X, y, estimator=estimator)
 
     
