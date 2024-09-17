@@ -4,3 +4,4 @@ KERAN_LOGO_PATH = "logo/Logo_Keran.png"
 DATAFRAME_HEIGHT = 200
 SAVE_PATH = "model_location.txt"
 MODEL_FILE = "rdf_model.joblib"
+RESULT_FOLDER = "Results"

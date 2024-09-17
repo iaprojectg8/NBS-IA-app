@@ -12,3 +12,6 @@ def callback_save():
 def callback_exit():
     st.session_state.train =0
     st.session_state.save = 0
+
+def callback_test():
+    st.session_state.test = 1

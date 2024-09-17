@@ -47,8 +47,6 @@ def manage_uploaded_files_raster_viz(raster_files):
 
 
 
-
-
 def manage_csv(uploaded_file):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp_file:
         temp_file.write(uploaded_file.read())
@@ -74,7 +72,7 @@ def create_grid(df, variable):
     # print(grid_y)
     points = df[['LAT', 'LON']].values  # Coordonnées connues
     values = df[variable].values  # Valeurs associées (certaines sont NaN)
-    grid_values = griddata(points, values, (grid_y, grid_x), method='nearest')
+    grid_values = griddata(points, values, (grid_y, grid_x), method='cubic')
     grid_values = grid_values[::-1, :]
     print(grid_values)
 
@@ -95,6 +93,7 @@ def get_min_max(df):
 def create_and_display_raster(df,filename, map):
     variable = filename.split("_")[0]
     lat_min, lat_max, lon_min, lon_max = get_min_max(df)
+    vmin, vmax = df["LST"].min(), df["LST"].max() 
     grid_values, pixel_size = create_grid(df,variable=variable)
     # Définir la taille des pixels et l'origine
 
@@ -119,7 +118,7 @@ def create_and_display_raster(df,filename, map):
                 crs='EPSG:4326', transform=transform) as dst:
             dst.write(grid_values, 1)
         st.success("TIF file done")
-        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1)    
+        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1,)    
 
     return map
 
@@ -136,10 +135,10 @@ def raster_vis(uploaded_file, map:leafmap):
         temp_file.write(uploaded_file.read())
         temp_file_path = temp_file.name
 
-    if "LST" in uploaded_file.name:
+    if "LST" in uploaded_file.name and not "pred" in uploaded_file.name :
         map.add_raster(temp_file_path, indexes=7, colormap='jet', layer_name=uploaded_file.name, opacity=1)
     else:
-        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1)
+        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=0, vmax=100    )
     
     return map
 
@@ -167,6 +166,16 @@ def upload_test_file_model():
     uploaded_file = st.file_uploader("Choose CSV file", type=["csv"], accept_multiple_files=False)
     return uploaded_file
 
+def upload_model_file():
+    """
+    Handle file uploads from the user.
+    Returns:
+        List of uploaded files.
+    """
+    st.subheader("Upload a test CSV file")
+    uploaded_file = st.file_uploader("Choose CSV file", type=["csv"], accept_multiple_files=False)
+    return uploaded_file
+
 def manage_uploaded_model(csv_file):
     """
     Display the uploaded rasters on a map using leafmap.
@@ -176,11 +185,29 @@ def manage_uploaded_model(csv_file):
     """
      
     if csv_file.type=="application/vnd.ms-excel":
-        
         df = manage_csv(uploaded_file=csv_file)
         variable_list = ["LAT", "LON","LS1","LS2","LS3","LS4","LS5","LS6","OCCSOL","URB","ALT","EXP","PENTE","NATSOL","NATSOL2","HAUTA","CATHYD","ZONECL","ALB"]
         selected_variables = st.multiselect("Chose the variable on which you want to train", options=variable_list,default=variable_list)
 
     return df, selected_variables
+
+#### Faire une liste globale qui puisse être mise en variable globale.
+
+def manage_test_variable_selection(csv_file):
+    if csv_file.type=="application/vnd.ms-excel":
+        df = manage_csv(uploaded_file=csv_file)
+        variable_list = ["LAT", "LON","LS1","LS2","LS3","LS4","LS5","LS6","OCCSOL","URB","ALT","EXP","PENTE","NATSOL","NATSOL2","HAUTA","CATHYD","ZONECL","ALB"]
+        selected_variables = st.multiselect("Chose the variable on which you want to train", options=variable_list,default=st.session_state.selected_variables)
+
+    return df, selected_variables
+
             
 
+
+def load_model(uploaded_file):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".joblib") as temp_file:
+        temp_file.write(uploaded_file.read())
+        temp_file_path = temp_file.name
+    model = load(temp_file_path)
+
+    return model

@@ -21,3 +21,17 @@ if "model_path" not in st.session_state:
 
 if "save" not in st.session_state:
     st.session_state.save=0
+
+
+if "selecected_variables" not in st.session_state:
+    st.session_state.selected_variables=[]
+
+if "estimator" not in st.session_state:
+    st.session_state.estimator = 50
+
+if "test"  not in st.session_state:
+    st.session_state.test = 0
+
+
+if "scaler" not in st.session_state:
+    st.session_state.scaler = None
