@@ -172,8 +172,8 @@ def upload_model_file():
     Returns:
         List of uploaded files.
     """
-    st.subheader("Upload a test CSV file")
-    uploaded_file = st.file_uploader("Choose CSV file", type=["csv"], accept_multiple_files=False)
+    st.subheader("Upload a model file")
+    uploaded_file = st.file_uploader("Chose a model file", type=[".joblib"], accept_multiple_files=False)
     return uploaded_file
 
 def manage_uploaded_model(csv_file):

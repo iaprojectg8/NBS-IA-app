@@ -31,13 +31,14 @@ st.title("Model Tester")
 
 
 #### Model part
-if "model" in st.session_state:
-    if st.session_state.model is not None:
-        st.write("You don't have to load your model, it is already in memory and here is a brief description of it")
-        st.write(str(st.session_state.model))
+
+if st.session_state.model is not None:
+    st.write("You don't have to load your model, it is already in memory and here is a brief description of it")
+    st.write(str(st.session_state.model))
 else:
-    uploaded_model = upload_model_file
-    st.session_state.model = load_model()
+    uploaded_model = upload_model_file()
+    if uploaded_model:
+        st.session_state.model = load_model(uploaded_file=uploaded_model)
 
 
 #### CSV part   
