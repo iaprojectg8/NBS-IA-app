@@ -11,7 +11,6 @@ from lib.tools import put_logo_if_possible
 from lib.logo_style import increase_logo
         
 put_logo_if_possible()
-
 st.logo(G8_LOGO_PATH)
 increase_logo()
 

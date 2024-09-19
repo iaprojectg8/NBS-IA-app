@@ -5,8 +5,10 @@ from streamlit import config_option
 from lib.callbacks import *
 from utils.variables import VARIABLES_LIST
 from lib.logo_style import increase_logo
+from lib.tools import put_logo_if_possible
 
 # Logo customization
+put_logo_if_possible()
 st.logo("logo/Logo_G8.png")
 increase_logo()
 
@@ -22,7 +24,7 @@ if uploaded_files:
       # Save the raster file temporarily
       if uploaded_file.type=="image/tiff":
           
-          # If rasters are uploaded, need to add 
+          # If rasters are uploaded, need to add    
           add_raster_to_map(uploaded_file=uploaded_file, map=map)
 
       elif uploaded_file.type=="application/vnd.ms-excel":
@@ -32,7 +34,7 @@ if uploaded_files:
 
           selected_variable = st.selectbox(label="Chose a variable to observe",options=VARIABLES_LIST)
           if selected_variable:
-              variable, grid_values, transform, complete_path = create_rasters_needs(df,uploaded_file.name)
+              variable, grid_values, transform, complete_path = create_rasters_needs(df,f'{selected_variable}_remake.tif')
               save_and_add_raster_to_map(variable, grid_values, transform, complete_path, map)
 
         

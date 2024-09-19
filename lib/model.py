@@ -6,7 +6,7 @@ from lib.callbacks import *
 from lib.uploader import get_min_max, create_grid
 from utils.variables import RESULT_FOLDER
 
-def rdf_regressor(X, y, estimator):
+def rdf_regressor(X, y, estimator, test_size):
     """
     Performs a random forest regression.
 
@@ -18,8 +18,9 @@ def rdf_regressor(X, y, estimator):
     Returns:
         None. The function outputs visualizations of the results after applying rdf regression.
     """
-  
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2 , random_state=42)
+
+    # Split the dataset
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size , random_state=42)
     scaler = StandardScaler()
 
     # Fit the scaler to your data and transform the data
@@ -31,10 +32,16 @@ def rdf_regressor(X, y, estimator):
     rf_model = RandomForestRegressor(n_estimators=estimator, random_state=42,n_jobs=-1,verbose=1)
     st.session_state.estimator = estimator
     rf_model.fit(X_train, y_train)
-    
-    # importance_vis(X_test=X_test, y_test=y_test, model=rf_model)
     basic_visualization(X_test=X_test, y_test=y_test, model = rf_model)
-    return rf_model
+    
+    # Put the scaler with the model to unpack it with the model at the wanted moment.
+    model_scaler_dict = {
+        'model': rf_model,
+        'scaler': scaler
+    }
+    st.session_state.model_scaler_dict = model_scaler_dict
+    
+    return model_scaler_dict
 
 
 def test(X, model:RandomForestRegressor):
@@ -62,15 +69,12 @@ def adjusted_r2_calc(r2, X_test):
     return adjusted_r2
 
 
-def save_model(model):
-    
-        
+def save_model():
+    """
+    Update the model path and display the button to save the model
+    """
     
     st.text_input("Folder path", key='input_path',value=st.session_state.input_path, on_change=update_file_path)
-        
-    # with col2:
-    #     st.button("Save path", on_click=save_download_path)
-
     st.button("Save model", on_click=callback_save)
     st.button("Exit", on_click=callback_exit)
     
@@ -126,3 +130,10 @@ def create_raster(df, variable, map):
         map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=17,vmax=43)    
 
     return map
+
+
+def display_all_precedent_training_graphs():
+    st.plotly_chart(st.session_state.stat_on_pred_fig1)
+    st.plotly_chart(st.session_state.stat_on_pred_fig2)
+    st.plotly_chart(st.session_state.results_fig1)
+    st.plotly_chart(st.session_state.results_fig2)

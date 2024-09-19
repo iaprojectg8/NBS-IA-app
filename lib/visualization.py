@@ -21,10 +21,12 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
     pred_range = range(int(min_pred), int(max_pred) + 1, 1)
     y_test_range = range(int(min_y_test), int(max_y_test) + 1, 1)
     bins = sorted(set(pred_range).union(set(y_test_range)))
-
+    print(bins)
+    
     # Reshape predictions to match the shape of y_test
     pred = np.reshape(pred, y_test.shape)
-    print(len(pred))
+    
+
     
     # Determine which predictions are within the threshold of the ground truth
     well_predicted = (abs(pred - y_test) <= threshold)
@@ -32,13 +34,17 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
     others = pred[~well_predicted]
 
     # Calculate the percentage of well-predicted values
-    well_predicted_counts, _ = np.histogram(well_predicted_array, bins=bins)
-    print(len(well_predicted_counts))
+    well_predicted_counts, bin_edges = np.histogram(well_predicted_array, bins=bins)
+    print(bin_edges)
+    print(well_predicted_counts)
+    print("wp count", len(well_predicted_counts))
     total_counts, _ = np.histogram(np.concatenate([well_predicted_array, others]), bins=bins)
-    print(len(total_counts))
+    print("tot count", len(total_counts))
     percentages = well_predicted_counts / total_counts
     percentages = [0 if (percentage < 1e-5 or np.isnan(percentage)) else round(percentage, 2) for percentage in percentages]
-    print(len(bins), len(percentages))
+    print(len(percentages))
+    print(percentages)
+
 
     # Create the first figure for distribution comparison
     fig1 = go.Figure()
@@ -77,36 +83,31 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
     # Calculate the overall percentage of well-predicted values
     well_predicted_all = sum(well_predicted_counts) / sum(total_counts)
     font_color = "white"
-    fig2.add_trace(go.Histogram(
-        x=well_predicted_array.flatten(), 
-        nbinsx=len(bins), 
-        name=f'{well_predicted_all:.2f} of well predicted \nwith {threshold} precision', 
-        marker_color='green', 
-        opacity=1))
     
     fig2.add_trace(go.Histogram(
         x=others.flatten(), 
         nbinsx=len(bins), 
         name=f'{1 - well_predicted_all:.2f} Mispredicted',
         marker_color='red', 
+        
+        opacity=1))
+    fig2.add_trace(go.Histogram(
+        x=well_predicted_array.flatten(), 
+        nbinsx=len(bins), 
+        name=f'{well_predicted_all:.2f} of well predicted \nwith {threshold} precision', 
         text=[percentage for percentage in percentages],
         textposition='auto',
+        textangle=0,
         textfont=dict(color=f"{font_color}",weight=90,shadow="auto"),
+        marker_color='green', 
         opacity=1))
+    
+    
 
     # Annotate histogram with percentages
     bin_centers = [bin + 0.5 for bin in bins]  # Center of each bin
    
-    # for i, percentage in enumerate(percentages):
-    #     if percentage != 0:
-    #         fig2.add_annotation(
-    #             x=bin_centers[i],
-    #             y= max(5,max(well_predicted_counts[i], total_counts[i])-8),  # Position on top of the bar
-    #             text=str(percentage),
-    #             showarrow=False,
-    #             font=dict(color='white', size=len(bin_centers)/2),
-    #             align='center'
-    #         )
+    
     
     fig2.update_layout(
         title=f"{title} - Well Predicted vs Mispredicted",
@@ -127,8 +128,10 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
 
 
     # Display the figures in Streamlit
-    st.plotly_chart(fig1)
-    st.plotly_chart(fig2)
+    st.session_state.stat_on_pred_fig1 = fig1
+    st.session_state.stat_on_pred_fig2 = fig2
+    st.plotly_chart( st.session_state.stat_on_pred_fig1)
+    st.plotly_chart( st.session_state.stat_on_pred_fig2)
 
     if wandb_push:
         import wandb
@@ -232,6 +235,10 @@ def basic_visualization(X_test,y_test,model):
     )
 
     # Scatter plot for predicted vs ground truth temperatures
+    
+    indices = np.random.choice(len(y_test), 10000, replace=False)
+    y_test = y_test[indices]
+    y_pred = y_pred[indices]
     scatter_trace = go.Scatter(
         x=y_test,
         y=y_pred,
@@ -271,6 +278,8 @@ def basic_visualization(X_test,y_test,model):
             
         )
     )
-
+    print("All graphs are ok")
+    st.session_state.results_fig1 = fig1
+    st.session_state.results_fig2 = fig2
     st.plotly_chart(fig1)
     st.plotly_chart(fig2)

@@ -1,5 +1,5 @@
 from utils.imports import *
-from utils.variables import MODEL_FILE
+from utils.variables import MODEL_FILE, TRAINING_LIST
 
 if "train" not in st.session_state:
     st.session_state.train = 0
@@ -23,8 +23,8 @@ if "save" not in st.session_state:
     st.session_state.save=0
 
 
-if "selecected_variables" not in st.session_state:
-    st.session_state.selected_variables=[]
+if "selected_variables" not in st.session_state:
+    st.session_state.selected_variables=TRAINING_LIST
 
 if "estimator" not in st.session_state:
     st.session_state.estimator = 50
@@ -35,3 +35,25 @@ if "test"  not in st.session_state:
 
 if "scaler" not in st.session_state:
     st.session_state.scaler = None
+    
+if "model_scaler_dict" not in st.session_state:
+    st.session_state.model_scaler_dict = {}
+    
+if "stat_on_pred_fig1" not in st.session_state:    
+    st.session_state.stat_on_pred_fig1 = None
+
+
+if "stat_on_pred_fig2" not in st.session_state:    
+    st.session_state.stat_on_pred_fig2 = None
+    
+if "results_fig1" not in st.session_state:    
+    st.session_state.results_fig1 = None
+    
+if "results_fig2" not in st.session_state:    
+    st.session_state.results_fig2 = None
+    
+if "training_done" not in st.session_state: 
+    st.session_state.training_done = 0
+    
+if "csv_file" not in st.session_state:
+    st.session_state.csv_file = 0
