@@ -5,3 +5,4 @@ DATAFRAME_HEIGHT = 200
 SAVE_PATH = "model_location.txt"
 MODEL_FILE = "rdf_model.joblib"
 RESULT_FOLDER = "Results"
+VARIABLES_LIST = ["LST","LS1","LS2","LS3","LS4","LS5","LS6","OCCSOL","URB","ALT","EXP","PENTE","NATSOL","NATSOL2","HAUTA","CATHYD","ZONECL","ALB"]

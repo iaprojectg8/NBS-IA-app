@@ -8,24 +8,12 @@ from lib.callbacks import *
 from utils.variables import G8_LOGO_PATH, KERAN_LOGO_PATH
 from lib.preprocessing import *
 from lib.tools import put_logo_if_possible
-    
+from lib.logo_style import increase_logo
+        
 put_logo_if_possible()
 
 st.logo(G8_LOGO_PATH)
-st.markdown("""
-            <style>
-    div[data-testid="stSidebarHeader"] > img, div[data-testid="collapsedControl"] > img {
-      height: 3rem;
-      width: auto;
-    }
-  
-    div[data-testid="stSidebarHeader"], div[data-testid="stSidebarHeader"] > *,
-    div[data-testid="collapsedControl"], div[data-testid="collapsedControl"] > * {
-      display: flex;
-      align-items: center;
-    }
-</style>
-            """,unsafe_allow_html=True)
+increase_logo()
 
 st.title("Model Tester")
 
@@ -44,8 +32,9 @@ else:
 #### CSV part   
 uploaded_files = upload_test_file_model()
 if uploaded_files:
-    
+        
     print(uploaded_files)
+    print(st.session_state.selected_variables)
     df, selected_variables = manage_uploaded_model(uploaded_files)
     X,y = create_X_y(df,selected_variables) 
     X_scaled = st.session_state.scaler.transform(X)
@@ -53,9 +42,14 @@ if uploaded_files:
     if st.session_state.test:
         map = leafmap.Map()
         y_pred = test(X_scaled, st.session_state.model)
+
+        # Creating new_fields
         df["LST_pred"] = y_pred
+        df["Diff_LST"] =  y_pred - y
+
         print(df)
         map = create_raster(df=df, variable="LST",map=map)
         map = create_raster(df=df, variable="LST_pred",map=map)
+        map = create_raster(df=df, variable="Diff_LST", map=map)
         map.to_streamlit()
         # show(difference)

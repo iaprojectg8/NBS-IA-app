@@ -115,7 +115,7 @@ def create_raster(df, variable, map):
                 crs='EPSG:4326', transform=transform) as dst:
             dst.write(grid_values, 7)
         st.success("TIF file done")
-        map.add_raster(complete_path, indexes=7, colormap='jet', layer_name=variable, opacity=1, )
+        map.add_raster(complete_path, indexes=7, colormap='jet', layer_name=variable, opacity=1)
     else :
         print("here i am building the prediction image")
         with rasterio.open(complete_path, 'w', driver='GTiff', height=grid_values.shape[0],
@@ -123,6 +123,6 @@ def create_raster(df, variable, map):
                 crs='EPSG:4326', transform=transform) as dst:
             dst.write(grid_values, 1)
         st.success("TIF file done")
-        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=vmin, vmax=vmax)    
+        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=17,vmax=43)    
 
     return map
