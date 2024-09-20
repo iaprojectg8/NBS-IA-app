@@ -26,8 +26,8 @@ def manage_csv(uploaded_file):
         temp_file.write(uploaded_file.read())
         temp_file_path = temp_file.name
     df = pd.read_csv(temp_file_path)
-    st.subheader("Complete dataframe")
-    st.dataframe(df,height=DATAFRAME_HEIGHT)
+    print(df)
+    
     
     return df
 
@@ -161,10 +161,13 @@ def add_raster_to_map(uploaded_file, map:leafmap):
         temp_file_path = temp_file.name
 
     # Here it woul be good to make a defaut display for each of the possible variable
-    if "LST" in uploaded_file.name and not "pred" in uploaded_file.name :
+    if "LST" in uploaded_file.name and not "pred" in uploaded_file.name and not "Diff" in uploaded_file.name :
         map.add_raster(temp_file_path, indexes=7, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=17, vmax=44)
+
+    elif "pred" in uploaded_file.name:
+        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=17, vmax=44)
     else:
-        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=0, vmax=6)
+        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=-10, vmax=10)
     
     return map
 
@@ -180,6 +183,16 @@ def upload_csv_train_file():
     uploaded_file = st.file_uploader("Choose CSV file", type=["csv"], accept_multiple_files=False)
     return uploaded_file
 
+
+def upload_training_file():
+    """
+    Handle file uploads from the user.
+    Returns:
+        List of uploaded files.
+    """
+    st.subheader("Upload your training file")
+    uploaded_file = st.file_uploader("Choose your training CSV file", type=["csv"], accept_multiple_files=False)
+    return uploaded_file
 
 def upload_test_file():
     """

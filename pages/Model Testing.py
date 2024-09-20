@@ -27,6 +27,8 @@ else:
     if uploaded_model:
         st.session_state.model_scaler_dict = load_model(uploaded_file=uploaded_model)
 
+
+
 model = st.session_state.model_scaler_dict["model"]
 scaler = st.session_state.model_scaler_dict["scaler"]
 #### CSV part   
@@ -40,19 +42,48 @@ if uploaded_test_file:
     st.subheader("Testing dataframe")
     st.dataframe(X, height=DATAFRAME_HEIGHT)
     X_scaled = scaler.transform(X)
-    st.button("Test your model", on_click=callback_test)
+
+    if st.session_state.df_init is not None:
+        st.write("Your training dataframe is already in memory so you don't need to upload it")
         
+    else:
+        st.session_state.df_init = upload_training_file()
+    
+    if st.session_state.df_init is not None:
+        st.subheader("Training dataset")
+        df_current = st.session_state.df_init.set_index(['LAT', 'LON'])
+        df_future = df.set_index(['LAT', 'LON'])
+
+        # Reindex df2 to match the order of df1
+        reordered_df = df_current.reindex(df_future.index)
+        print(df)
+        reordered_df = reordered_df.reset_index()
+        print(reordered_df)
+
+        # Optionally, reset the index if you don't want 'lat' and 'lon' as index
+        
+        X_train,y_train = create_X_y(reordered_df, selected_variables)
+        st.dataframe(X_train, height=DATAFRAME_HEIGHT)
+        X_train_scaled = scaler.transform(X_train)
+
+    st.button("Test your model", on_click=callback_test)
+
     if st.session_state.test:
         map = leafmap.Map()
-        y_pred = test(X_scaled, model=model)
+        y_pred, y_train_pred = test(X_scaled, X_train_scaled, model=model)
 
         # Creating new_fields
-        df["LST_pred"] = y_pred
-        df["Diff_LST"] =  y_pred - y
+        df["LST_pred"] = y_train_pred
+        df["LST_pred_fut"] = y_pred
+        df["Diff_LST"] =  y_pred - y_train_pred
 
         print(df)
-        map = create_raster(df=df, variable="LST",map=map)
-        map = create_raster(df=df, variable="LST_pred",map=map)
-        map = create_raster(df=df, variable="Diff_LST", map=map)
-        map.to_streamlit()
+        with st.status("Creating the rasters...",expanded=True):
+            st.write("Current LST prediction...")
+            map = create_raster(df=df, variable="LST_pred",map=map)
+            st.write("Future LST prediction...")
+            map = create_raster(df=df, variable="LST_pred_fut",map=map)
+            st.write("Difference between both...")
+            map = create_raster(df=df, variable="Diff_LST", map=map)
+            map.to_streamlit()
      

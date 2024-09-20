@@ -9,7 +9,7 @@ from utils.variables import G8_LOGO_PATH, TRAINING_LIST, DATAFRAME_HEIGHT
 from lib.preprocessing import *
 from lib.tools import put_logo_if_possible
 from lib.logo_style import increase_logo
-from copy import copy
+from copy import copy, deepcopy
     
 put_logo_if_possible()
 st.logo(G8_LOGO_PATH)
@@ -21,6 +21,8 @@ if st.session_state.csv_file:
     
 
     df = manage_csv(uploaded_file=st.session_state.csv_file)
+    print(df)
+    st.session_state.df_init = df
     n_rows = len(df)
     print(st.session_state.selected_variables)
     selected_variables = st.multiselect("Chose the variable on which you want to train", options=TRAINING_LIST,default=st.session_state.selected_variables)
@@ -28,10 +30,10 @@ if st.session_state.csv_file:
     print(st.session_state.selected_variables)
     # This selectbox is made to chose the amount of data to train, divided by 10 and 2 the orginial amount of data
     data_amount = st.selectbox("Choose the data size for training",[int(n_rows/10**(i/2)) if i%2==0 else int(n_rows/(10**((i-1)/2)*2),) for i in range(10)])
-    df = df.sample(data_amount,ignore_index=True)
+    df_sampled = copy(df).sample(data_amount,ignore_index=True)
     
     # Separate the labels and the variables
-    X,y = create_X_y(df,copy(selected_variables))
+    X,y = create_X_y(df_sampled,copy(selected_variables))
     st.subheader("Training dataframe")
     st.dataframe(X, height=DATAFRAME_HEIGHT)
     print("AFter creating X and y",st.session_state.selected_variables)

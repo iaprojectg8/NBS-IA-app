@@ -44,11 +44,13 @@ def rdf_regressor(X, y, estimator, test_size):
     return model_scaler_dict
 
 
-def test(X, model:RandomForestRegressor):
+def test(X,X_train, model:RandomForestRegressor):
+
 
     y_pred = model.predict(X)
+    y_train_pred = model.predict(X_train)
     
-    return y_pred
+    return y_pred, y_train_pred
 
 
 def adjusted_r2_calc(r2, X_test):
@@ -120,6 +122,14 @@ def create_raster(df, variable, map):
             dst.write(grid_values, 7)
         st.success("TIF file done")
         map.add_raster(complete_path, indexes=7, colormap='jet', layer_name=variable, opacity=1)
+    elif variable == "Diff_LST":
+        print("here i am building the prediction image")
+        with rasterio.open(complete_path, 'w', driver='GTiff', height=grid_values.shape[0],
+                width=grid_values.shape[1], count=1, dtype=grid_values.dtype,
+                crs='EPSG:4326', transform=transform) as dst:
+            dst.write(grid_values, 1)
+        st.success("TIF file done")
+        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=-10,vmax=10)    
     else :
         print("here i am building the prediction image")
         with rasterio.open(complete_path, 'w', driver='GTiff', height=grid_values.shape[0],

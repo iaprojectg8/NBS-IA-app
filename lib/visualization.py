@@ -204,13 +204,13 @@ def basic_visualization(X_test,y_test,model):
 
     # Colors needed to create the second graphs
     colors = [
-        'rgba(0, 153, 0, 1)',          # Equivalent to [0, 0.60261373, 0, 1]
-        'rgba(0, 209, 0, 1)',          # Equivalent to [0, 0.82223333, 0, 1]
-        'rgba(59, 255, 0, 1)',         # Equivalent to [0.2300549, 1, 0, 1]
-        'rgba(239, 237, 0, 1)',        # Equivalent to [0.93591569, 0.92807255, 0, 1]
-        'rgba(255, 169, 0, 1)',        # Equivalent to [1, 0.6627451, 0, 1]
-        'rgba(243, 0, 0, 1)',          # Equivalent to [0.95556667, 0, 0, 1]
-        'rgba(204, 12, 12, 1)'         # Equivalent to [0.8, 0.04705882, 0.04705882, 1]
+        'rgba(0, 153, 0, 0.6)',          # Equivalent to [0, 0.60261373, 0, 1]
+        'rgba(0, 209, 0, 0.6)',          # Equivalent to [0, 0.82223333, 0, 1]
+        'rgba(59, 255, 0, 0.6)',         # Equivalent to [0.2300549, 1, 0, 1]
+        'rgba(239, 237, 0, 0.6)',        # Equivalent to [0.93591569, 0.92807255, 0, 1]
+        'rgba(255, 169, 0, 0.6)',        # Equivalent to [1, 0.6627451, 0, 1]
+        'rgba(243, 0, 0, 0.6)',          # Equivalent to [0.95556667, 0, 0, 1]
+        'rgba(204, 12, 12, 0.6)'         # Equivalent to [0.8, 0.04705882, 0.04705882, 1]
     ]
     font_color = "white"
     fig1 = go.Figure()
@@ -239,8 +239,8 @@ def basic_visualization(X_test,y_test,model):
 
     # Scatter plot for predicted vs ground truth temperatures
     print(y_test.shape[0])
-    if y_test.shape[0] > 10000:
-        indices = np.random.choice(len(y_test), 10000, replace=False) 
+    if y_test.shape[0] > 50000:
+        indices = np.random.choice(len(y_test), 50000, replace=False) 
         y_test = y_test[indices]
         y_pred = y_pred[indices]
 
@@ -250,7 +250,7 @@ def basic_visualization(X_test,y_test,model):
         y=y_pred,
         mode='markers',
         name=f'R2 = {r2:.2f}       R2*= {adjusted_r2:.2f}\nMSE = {mse:.2f}    MAE = {mae:.2f}',
-        marker=dict(color=' rgb(0,191,255, .8)', size=5)
+        marker=dict(color=' rgb(0,191,255, 1)', size=8)
     )
 
     # Add interval lines to the scatter plot
@@ -270,7 +270,7 @@ def basic_visualization(X_test,y_test,model):
             showlegend=False
         ))
 
-    fig2 = go.Figure(data=[scatter_trace] + lines)
+    fig2 = go.Figure(data= [scatter_trace] + lines  )
     fig2.update_layout(
         title="Predicted vs Ground Truth temperature",
         xaxis_title="Ground Truth Temperatures",
