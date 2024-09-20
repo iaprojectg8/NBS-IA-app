@@ -16,12 +16,12 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
     max_pred = pred.max()
     min_y_test = y_test.min()
     max_y_test = y_test.max()
+ 
     
     # Create ranges and bins for the histograms
-    pred_range = range(int(min_pred), int(max_pred) + 1, 1)
-    y_test_range = range(int(min_y_test), int(max_y_test) + 1, 1)
-    bins = sorted(set(pred_range).union(set(y_test_range)))
-    print(bins)
+    pred_range = range(floor(min_pred), ceil(max_pred) + 1, 1)
+    bins=pred_range
+
     
     # Reshape predictions to match the shape of y_test
     pred = np.reshape(pred, y_test.shape)
@@ -35,29 +35,37 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
 
     # Calculate the percentage of well-predicted values
     well_predicted_counts, bin_edges = np.histogram(well_predicted_array, bins=bins)
-    print(bin_edges)
-    print(well_predicted_counts)
-    print("wp count", len(well_predicted_counts))
     total_counts, _ = np.histogram(np.concatenate([well_predicted_array, others]), bins=bins)
-    print("tot count", len(total_counts))
     percentages = well_predicted_counts / total_counts
     percentages = [0 if (percentage < 1e-5 or np.isnan(percentage)) else round(percentage, 2) for percentage in percentages]
-    print(len(percentages))
-    print(percentages)
 
-
+    # Trim leading and finishing 0 to fit the histogram
+    percentages = np.trim_zeros(percentages)
+   
     # Create the first figure for distribution comparison
     fig1 = go.Figure()
+    print("len_bins",len(bins))
 
     fig1.add_trace(go.Histogram(
         x=pred.flatten(), 
-        nbinsx=len(bins), 
+        nbinsx=len(bins),
+        xbins=dict(
+            start=floor(min(pred)),  # Starting value for bins
+            end=ceil(max(pred)),    # Ending value for bins
+            size=1              # Bin size (step) set to 1
+        ), 
         name='Prediction', 
         marker_color='blue', 
         opacity=0.8))
+    
     fig1.add_trace(go.Histogram(
         x=y_test.flatten(), 
         nbinsx=len(bins), 
+        xbins=dict(
+            start=floor(min(pred)),  # Starting value for bins
+            end=ceil(max(pred)),    # Ending value for bins
+            size=1              # Bin size (step) set to 1
+        ),
         name='Ground Truth', 
         marker_color='green', 
         opacity=0.8))
@@ -86,28 +94,21 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
     
     fig2.add_trace(go.Histogram(
         x=others.flatten(), 
-        nbinsx=len(bins), 
+        nbinsx=len(bins),
         name=f'{1 - well_predicted_all:.2f} Mispredicted',
         marker_color='red', 
-        
         opacity=1))
+    
     fig2.add_trace(go.Histogram(
         x=well_predicted_array.flatten(), 
-        nbinsx=len(bins), 
-        name=f'{well_predicted_all:.2f} of well predicted \nwith {threshold} precision', 
+        nbinsx=len(bins),
+        name=f'{well_predicted_all:.2f} of well predicted \nwith {threshold} precision',
         text=[percentage for percentage in percentages],
         textposition='auto',
         textangle=0,
         textfont=dict(color=f"{font_color}",weight=90,shadow="auto"),
         marker_color='green', 
         opacity=1))
-    
-    
-
-    # Annotate histogram with percentages
-    bin_centers = [bin + 0.5 for bin in bins]  # Center of each bin
-   
-    
     
     fig2.update_layout(
         title=f"{title} - Well Predicted vs Mispredicted",
@@ -200,6 +201,8 @@ def basic_visualization(X_test,y_test,model):
     
     # Create bar chart for residuals
     labels = [f'[{interval[0]}, {interval[1]}]' for interval in intervals]
+
+    # Colors needed to create the second graphs
     colors = [
         'rgba(0, 153, 0, 1)',          # Equivalent to [0, 0.60261373, 0, 1]
         'rgba(0, 209, 0, 1)',          # Equivalent to [0, 0.82223333, 0, 1]
@@ -235,10 +238,13 @@ def basic_visualization(X_test,y_test,model):
     )
 
     # Scatter plot for predicted vs ground truth temperatures
-    
-    indices = np.random.choice(len(y_test), 10000, replace=False)
-    y_test = y_test[indices]
-    y_pred = y_pred[indices]
+    print(y_test.shape[0])
+    if y_test.shape[0] > 10000:
+        indices = np.random.choice(len(y_test), 10000, replace=False) 
+        y_test = y_test[indices]
+        y_pred = y_pred[indices]
+
+
     scatter_trace = go.Scatter(
         x=y_test,
         y=y_pred,
@@ -275,6 +281,9 @@ def basic_visualization(X_test,y_test,model):
             orientation="v",  # Horizontal legend
             yanchor="auto",  # Push the legend below the plot
             xanchor="auto",  # Center the legend
+            x=0.05,
+            y=1,
+            bgcolor='rgba(0, 0, 0, 0)',
             
         )
     )

@@ -5,7 +5,7 @@ from lib.visualization import *
 from lib.model import rdf_regressor, save_model, display_all_precedent_training_graphs
 from streamlit import config_option
 from lib.callbacks import *
-from utils.variables import G8_LOGO_PATH, TRAINING_LIST
+from utils.variables import G8_LOGO_PATH, TRAINING_LIST, DATAFRAME_HEIGHT
 from lib.preprocessing import *
 from lib.tools import put_logo_if_possible
 from lib.logo_style import increase_logo
@@ -32,6 +32,8 @@ if st.session_state.csv_file:
     
     # Separate the labels and the variables
     X,y = create_X_y(df,copy(selected_variables))
+    st.subheader("Training dataframe")
+    st.dataframe(X, height=DATAFRAME_HEIGHT)
     print("AFter creating X and y",st.session_state.selected_variables)
 
 

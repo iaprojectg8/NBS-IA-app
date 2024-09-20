@@ -181,7 +181,7 @@ def upload_csv_train_file():
     return uploaded_file
 
 
-def upload_test_file_model():
+def upload_test_file():
     """
     Handle file uploads from the user.
     Returns:

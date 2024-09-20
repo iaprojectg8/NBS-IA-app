@@ -29,8 +29,7 @@ def create_X_y(df,parameters_list):
     y = df["LST"] 
     y = np.array(y,dtype=np.float16)     
     X = df.drop('LST', axis=1)  # If you want to take all the variables except the dependant one do this, even if it is hard to understand
-    st.subheader("Training dataframe")
-    st.dataframe(X, height=DATAFRAME_HEIGHT)
+    
 
     return X,y
 
