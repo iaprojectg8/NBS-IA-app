@@ -5,7 +5,7 @@ from lib.visualization import *
 from lib.model import rdf_regressor, test, create_raster
 from streamlit import config_option
 from lib.callbacks import *
-from utils.variables import G8_LOGO_PATH, KERAN_LOGO_PATH, DATAFRAME_HEIGHT
+from utils.variables import G8_LOGO_PATH, DATAFRAME_HEIGHT
 from lib.preprocessing import *
 from lib.tools import put_logo_if_possible
 from lib.logo_style import increase_logo
@@ -19,18 +19,20 @@ st.title("Model Tester")
 
 #### Model part
 
-if st.session_state.model_scaler_dict is not None:
+if st.session_state.model_scaler_dict:
     st.write("You don't have to load your model, it is already in memory and here is a brief description of it")
-    st.write(str(st.session_state.model_scaler_dict["model"]))
+    st.write(f"Model used: {str(st.session_state.model_scaler_dict["model"])}")
+    st.write(f"Scaler used: {str(st.session_state.model_scaler_dict["scaler"])}")
+
 else:
     uploaded_model = upload_model_file()
     if uploaded_model:
         st.session_state.model_scaler_dict = load_model(uploaded_file=uploaded_model)
 
 
-
-model = st.session_state.model_scaler_dict["model"]
-scaler = st.session_state.model_scaler_dict["scaler"]
+if "model" in st.session_state.model_scaler_dict and "scaler" in st.session_state.model_scaler_dict:
+    model = st.session_state.model_scaler_dict["model"]
+    scaler = st.session_state.model_scaler_dict["scaler"]
 #### CSV part   
 uploaded_test_file = upload_test_file()
 if uploaded_test_file:
@@ -47,10 +49,14 @@ if uploaded_test_file:
         st.write("Your training dataframe is already in memory so you don't need to upload it")
         
     else:
-        st.session_state.df_init = upload_training_file()
+        uploaded_training_file = upload_training_file()
+        if uploaded_training_file:
+            st.session_state.df_init = manage_csv(uploaded_file=uploaded_training_file)
+        
     
     if st.session_state.df_init is not None:
         st.subheader("Training dataset")
+        st.write(st.session_state.df_init)
         df_current = st.session_state.df_init.set_index(['LAT', 'LON'])
         df_future = df.set_index(['LAT', 'LON'])
 

@@ -21,13 +21,12 @@ if st.session_state.csv_file:
     
 
     df = manage_csv(uploaded_file=st.session_state.csv_file)
-    print(df)
     st.session_state.df_init = df
     n_rows = len(df)
-    print(st.session_state.selected_variables)
+
+    # Select the variables
     selected_variables = st.multiselect("Chose the variable on which you want to train", options=TRAINING_LIST,default=st.session_state.selected_variables)
     st.session_state.selected_variables = selected_variables
-    print(st.session_state.selected_variables)
     # This selectbox is made to chose the amount of data to train, divided by 10 and 2 the orginial amount of data
     data_amount = st.selectbox("Choose the data size for training",[int(n_rows/10**(i/2)) if i%2==0 else int(n_rows/(10**((i-1)/2)*2),) for i in range(10)])
     df_sampled = copy(df).sample(data_amount,ignore_index=True)
@@ -58,7 +57,7 @@ if st.session_state.csv_file:
     if st.session_state.save:
          
       
-        dump(model_scaler_dict, st.session_state.input_path)
+        dump(st.session_state.model_scaler_dict, st.session_state.input_path)
         st.session_state.save = 0
 
 

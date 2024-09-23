@@ -37,7 +37,7 @@ if "scaler" not in st.session_state:
     st.session_state.scaler = None
     
 if "model_scaler_dict" not in st.session_state:
-    st.session_state.model_scaler_dict = {}
+    st.session_state.model_scaler_dict = dict()
     
 if "stat_on_pred_fig1" not in st.session_state:    
     st.session_state.stat_on_pred_fig1 = None

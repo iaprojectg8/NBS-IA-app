@@ -18,20 +18,25 @@ def rdf_regressor(X, y, estimator, test_size):
     Returns:
         None. The function outputs visualizations of the results after applying rdf regression.
     """
+    with st.status("Model Training...",expanded=True):
+        # Split the dataset
+        st.write("Splitting the dataset...")
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size , random_state=42)
 
-    # Split the dataset
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size , random_state=42)
-    scaler = StandardScaler()
+        
+        # Fit the scaler to your data and transform the data
+        st.write("Scaling explainable variables...")
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
+        st.session_state.scaler = scaler
 
-    # Fit the scaler to your data and transform the data
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
-    st.session_state.scaler = scaler
+        st.write("Training the Random Forest model...")
+        rf_model = RandomForestRegressor(n_estimators=estimator, random_state=42,n_jobs=-1,verbose=1)
+        st.session_state.estimator = estimator
+        rf_model.fit(X_train, y_train)
 
-    print("Training the model")
-    rf_model = RandomForestRegressor(n_estimators=estimator, random_state=42,n_jobs=-1,verbose=1)
-    st.session_state.estimator = estimator
-    rf_model.fit(X_train, y_train)
+        st.write("Making graphs")
     basic_visualization(X_test=X_test, y_test=y_test, model = rf_model)
     
     # Put the scaler with the model to unpack it with the model at the wanted moment.
