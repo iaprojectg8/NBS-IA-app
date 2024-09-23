@@ -58,5 +58,5 @@ if "training_done" not in st.session_state:
 if "csv_file" not in st.session_state:
     st.session_state.csv_file = 0
 
-if "df_init" not in st.session_state:
-    st.session_state.df_init = None
+if "df_train" not in st.session_state:
+    st.session_state.df_train = None

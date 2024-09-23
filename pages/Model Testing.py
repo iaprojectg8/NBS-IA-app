@@ -1,8 +1,7 @@
 from utils.imports import *
 from lib.session_variables import *
 from lib.uploader import *
-from lib.visualization import *
-from lib.model_test import test, create_raster
+from lib.model_test import test, create_raster, init_test
 from streamlit import config_option
 from lib.callbacks import *
 from utils.variables import G8_LOGO_PATH, DATAFRAME_HEIGHT
@@ -14,10 +13,8 @@ st.logo(G8_LOGO_PATH)
 increase_logo()
 
 st.title("Model Tester")
-
-
-#### Model part
-
+init_test
+# Information given about the model trained or uploaded
 if st.session_state.model_scaler_dict:
     st.write("You don't have to load your model, it is already in memory and here is a brief description of it")
     st.write(f"Model used: {str(st.session_state.model_scaler_dict["model"])}")
@@ -29,14 +26,15 @@ else:
         st.session_state.model_scaler_dict = load_model(uploaded_file=uploaded_model)
 
 
+# Simplify the variable
 if "model" in st.session_state.model_scaler_dict and "scaler" in st.session_state.model_scaler_dict:
     model = st.session_state.model_scaler_dict["model"]
     scaler = st.session_state.model_scaler_dict["scaler"]
-#### CSV part   
+
+
 uploaded_test_file = upload_test_file()
 if uploaded_test_file:
         
-    print(st.session_state.selected_variables)
     df = manage_csv(uploaded_file=uploaded_test_file) 
     selected_variables = selected_variables = st.multiselect("Chose the variable on which you want to train", options=TRAINING_LIST,default=st.session_state.selected_variables)
     X,y = create_X_y(df,selected_variables) 
@@ -44,29 +42,24 @@ if uploaded_test_file:
     st.dataframe(X, height=DATAFRAME_HEIGHT)
     X_scaled = scaler.transform(X)
 
-    if st.session_state.df_init is not None:
+    if st.session_state.df_train is not None:
         st.write("Your training dataframe is already in memory so you don't need to upload it")
         
     else:
         uploaded_training_file = upload_training_file()
         if uploaded_training_file:
-            st.session_state.df_init = manage_csv(uploaded_file=uploaded_training_file)
+            st.session_state.df_train = manage_csv(uploaded_file=uploaded_training_file)
         
     
-    if st.session_state.df_init is not None:
+    if st.session_state.df_train is not None:
         st.subheader("Training dataset")
-        st.write(st.session_state.df_init)
-        df_current = st.session_state.df_init.set_index(['LAT', 'LON'])
+        st.write(st.session_state.df_train)
+
+        df_current = st.session_state.df_train.set_index(['LAT', 'LON'])
         df_future = df.set_index(['LAT', 'LON'])
-
-        # Reindex df2 to match the order of df1
         reordered_df = df_current.reindex(df_future.index)
-        print(df)
         reordered_df = reordered_df.reset_index()
-        print(reordered_df)
-
-        # Optionally, reset the index if you don't want 'lat' and 'lon' as index
-        
+    
         X_train,y_train = create_X_y(reordered_df, selected_variables)
         st.dataframe(X_train, height=DATAFRAME_HEIGHT)
         X_train_scaled = scaler.transform(X_train)

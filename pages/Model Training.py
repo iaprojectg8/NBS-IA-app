@@ -18,22 +18,23 @@ st.session_state.csv_file = upload_csv_train_file()
 if st.session_state.csv_file:
     
     df = manage_csv(uploaded_file=st.session_state.csv_file)
-    st.session_state.df_init = df
+    st.session_state.df_train = df
     n_rows = len(df)
 
     # Select the variables
-    selected_variables = st.multiselect("Chose the variable on which you want to train", options=TRAINING_LIST,default=st.session_state.selected_variables)
-    st.session_state.selected_variables = selected_variables
+    st.session_state.selected_variables = st.multiselect("Chose the variable on which you want to train", options=TRAINING_LIST,default=st.session_state.selected_variables)
+    
 
-    # This selectbox is made to chose the amount of data to train, divided by 10 and 2 the orginial amount of data
+    # Select the amount of observation for 
     data_amount = st.selectbox("Choose the data size for training",[int(n_rows/10**(i/2)) if i%2==0 else int(n_rows/(10**((i-1)/2)*2),) for i in range(10)])
     df_sampled = copy(df).sample(data_amount,ignore_index=True)
     
     # Separate and display dataset
-    X,y = create_X_y(df_sampled,copy(selected_variables))
+    X,y = create_X_y(df_sampled,copy(st.session_state.selected_variables))
     st.subheader("Training dataframe")
     st.dataframe(X, height=DATAFRAME_HEIGHT)
 
+    # Hyperparamters selection
     estimator = st.number_input(label="Amount of estimators (trees)", min_value=1, max_value=150, value=25)
     test_size = st.slider(label="Chose the data proportion given to test",min_value=0.0, max_value=1.0, step=0.01, value=0.2)
     st.button("Train a model", on_click=callback_train)
@@ -47,12 +48,14 @@ if st.session_state.csv_file:
         st.session_state.training_done = 1
         st.session_state.tarin = 0
 
+    # This is in case the training has been done but we want to display the results of it
     elif st.session_state.training_done:
         st.subheader("A model has already been trained, and here are the results")
         display_all_precedent_training_graphs()
         
     if st.session_state.save:
-         
+        
+        # It saves the model
         dump(st.session_state.model_scaler_dict, st.session_state.input_path)
         st.session_state.save = 0
 

@@ -7,6 +7,9 @@ from lib.raster_vis import get_min_max, create_grid
 from utils.variables import RESULT_FOLDER
 
 
+def init_test():
+    st.session_state.train=0
+
 
 def test(X,X_train, model:RandomForestRegressor):
 
