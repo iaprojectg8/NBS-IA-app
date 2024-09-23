@@ -92,14 +92,14 @@ def create_grid(df, variable):
     pixel_size = np.mean(pd.DataFrame(lat_unique).diff())
     grid_x, grid_y = np.meshgrid(lon_unique, lat_unique)
 
-    points = df[['LAT', 'LON']].values  # Coordonnées connues
-    values = df[variable].values  # Valeurs associées (certaines sont NaN)
+    points = df[['LAT', 'LON']].values
+    values = df[variable].values 
 
     # Make the grid knowing the pixel size
     grid_values = griddata(points, values, (grid_y, grid_x), method='cubic')
     # This is to invert the direction of the raster which is not good
     grid_values = grid_values[::-1, :]      
-    print(grid_values)
+
 
     return grid_values, pixel_size
 

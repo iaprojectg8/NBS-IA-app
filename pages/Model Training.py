@@ -1,7 +1,7 @@
 from utils.imports import *
 from lib.session_variables import *
 from lib.uploader import upload_csv_train_file, manage_csv
-from lib.model_train import rdf_regressor, display_all_precedent_training_graphs, save_model
+from lib.model_train import init_train, rdf_regressor, display_all_precedent_training_graphs, save_model
 from streamlit import config_option
 from lib.callbacks import callback_train
 from utils.variables import G8_LOGO_PATH, TRAINING_LIST, DATAFRAME_HEIGHT
@@ -14,10 +14,11 @@ st.logo(G8_LOGO_PATH)
 increase_logo()
 
 st.title("Model trainer")
-st.session_state.csv_file = upload_csv_train_file()
-if st.session_state.csv_file:
+init_train()
+csv_file = upload_csv_train_file()
+if csv_file:
     
-    df = manage_csv(uploaded_file=st.session_state.csv_file)
+    df = manage_csv(uploaded_file = csv_file)
     st.session_state.df_train = df
     n_rows = len(df)
 

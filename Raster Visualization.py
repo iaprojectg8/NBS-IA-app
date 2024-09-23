@@ -4,12 +4,15 @@ from streamlit import config_option
 from utils.variables import VARIABLES_LIST
 from lib.logo_style import increase_logo, put_logo_if_possible
 from lib.raster_vis import add_raster_to_map, create_rasters_needs, save_and_add_raster_to_map
+from lib.model_train import init_train
+from lib.model_test import init_test
 
 # Logo customization
 put_logo_if_possible()
 st.logo("logo/Logo_G8.png")
 increase_logo()
-
+init_train()
+init_test()
 # Title and uploader
 st.title("Raster Visualizer")
 uploaded_files = upload_files_raster_viz()

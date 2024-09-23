@@ -204,13 +204,13 @@ def basic_visualization(X_test,y_test,model):
 
     # Colors needed to create the second graphs
     colors = [
-        'rgba(0, 153, 0, 0.6)',          # Equivalent to [0, 0.60261373, 0, 1]
-        'rgba(0, 209, 0, 0.6)',          # Equivalent to [0, 0.82223333, 0, 1]
-        'rgba(59, 255, 0, 0.6)',         # Equivalent to [0.2300549, 1, 0, 1]
-        'rgba(239, 237, 0, 0.6)',        # Equivalent to [0.93591569, 0.92807255, 0, 1]
-        'rgba(255, 169, 0, 0.6)',        # Equivalent to [1, 0.6627451, 0, 1]
-        'rgba(243, 0, 0, 0.6)',          # Equivalent to [0.95556667, 0, 0, 1]
-        'rgba(204, 12, 12, 0.6)'         # Equivalent to [0.8, 0.04705882, 0.04705882, 1]
+        'rgba(0, 153, 0, 1)',          # Equivalent to [0, 0.60261373, 0, 1]
+        'rgba(0, 209, 0, 1)',          # Equivalent to [0, 0.82223333, 0, 1]
+        'rgba(59, 255, 0, 1)',         # Equivalent to [0.2300549, 1, 0, 1]
+        'rgba(239, 237, 0, 1)',        # Equivalent to [0.93591569, 0.92807255, 0, 1]
+        'rgba(255, 169, 0, 1)',        # Equivalent to [1, 0.6627451, 0, 1]
+        'rgba(243, 0, 0, 1)',          # Equivalent to [0.95556667, 0, 0, 1]
+        'rgba(204, 12, 12, 1)'         # Equivalent to [0.8, 0.04705882, 0.04705882, 1]
     ]
     font_color = "white"
     fig1 = go.Figure()
