@@ -2,13 +2,12 @@ from utils.imports import *
 from lib.session_variables import *
 from lib.uploader import *
 from lib.visualization import *
-from lib.model import rdf_regressor, test, create_raster
+from lib.model_test import test, create_raster
 from streamlit import config_option
 from lib.callbacks import *
 from utils.variables import G8_LOGO_PATH, DATAFRAME_HEIGHT
 from lib.preprocessing import *
-from lib.tools import put_logo_if_possible
-from lib.logo_style import increase_logo
+from lib.logo_style import increase_logo, put_logo_if_possible
         
 put_logo_if_possible()
 st.logo(G8_LOGO_PATH)

@@ -1,11 +1,8 @@
 from utils.imports import *
-from lib.uploader import *
-from lib.visualization import *
+from lib.uploader import upload_files_raster_viz, manage_csv
 from streamlit import config_option
-from lib.callbacks import *
 from utils.variables import VARIABLES_LIST
-from lib.logo_style import increase_logo
-from lib.tools import put_logo_if_possible
+from lib.logo_style import increase_logo, put_logo_if_possible
 from lib.raster_vis import add_raster_to_map, create_rasters_needs, save_and_add_raster_to_map
 
 # Logo customization

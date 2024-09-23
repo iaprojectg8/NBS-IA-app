@@ -15,21 +15,7 @@ def upload_files_raster_viz():
     return uploaded_files
 
 
-################################### This is used for all the parts ##################################
-def manage_csv(uploaded_file):
-    """
-    Manage the opening of the CSV file from the temporary file
-    Args:
-        uploaded_file (UploadedFile) : Dict containing diverse informations about the file
-    Returns:
-        df (pd.Dataframe) : dataframe containing all the variables
-    """
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp_file:
-        temp_file.write(uploaded_file.read())
-        temp_file_path = temp_file.name
-    df = pd.read_csv(temp_file_path)
-    
-    return df
+
 
 #################################### Training page part ##############################################
 
@@ -96,3 +82,20 @@ def load_model(uploaded_file):
     model = load(temp_file_path)
 
     return model
+
+
+################################### This is used for all the parts ##################################
+def manage_csv(uploaded_file):
+    """
+    Manage the opening of the CSV file from the temporary file
+    Args:
+        uploaded_file (UploadedFile) : Dict containing diverse informations about the file
+    Returns:
+        df (pd.Dataframe) : dataframe containing all the variables
+    """
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp_file:
+        temp_file.write(uploaded_file.read())
+        temp_file_path = temp_file.name
+    df = pd.read_csv(temp_file_path)
+    
+    return df

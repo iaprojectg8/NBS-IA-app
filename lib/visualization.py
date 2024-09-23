@@ -239,8 +239,8 @@ def basic_visualization(X_test,y_test,model):
 
     # Scatter plot for predicted vs ground truth temperatures
     print(y_test.shape[0])
-    if y_test.shape[0] > 50000:
-        indices = np.random.choice(len(y_test), 50000, replace=False) 
+    if y_test.shape[0] > 20000:
+        indices = np.random.choice(len(y_test), 20000, replace=False) 
         y_test = y_test[indices]
         y_pred = y_pred[indices]
 
