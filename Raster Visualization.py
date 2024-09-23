@@ -6,6 +6,7 @@ from lib.callbacks import *
 from utils.variables import VARIABLES_LIST
 from lib.logo_style import increase_logo
 from lib.tools import put_logo_if_possible
+from lib.raster_vis import add_raster_to_map, create_rasters_needs, save_and_add_raster_to_map
 
 # Logo customization
 put_logo_if_possible()
@@ -16,7 +17,6 @@ increase_logo()
 st.title("Raster Visualizer")
 uploaded_files = upload_files_raster_viz()
 if uploaded_files:
-    print(uploaded_files)
     
     # Create a Leafmap map
     map = leafmap.Map()
@@ -37,7 +37,6 @@ if uploaded_files:
               variable, grid_values, transform, complete_path = create_rasters_needs(df,f'{selected_variable}_remake.tif')
               save_and_add_raster_to_map(variable, grid_values, transform, complete_path, map)
 
-        
     map.to_streamlit()
     
 
