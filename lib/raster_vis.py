@@ -20,8 +20,11 @@ def add_raster_to_map(uploaded_file, map:leafmap):
 
     elif "pred" in uploaded_file.name:
         map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=17, vmax=44)
-    else:
+    elif "Diff" in uploaded_file.name:
         map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=-10, vmax=10)
+
+    else :
+        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1)
     
     return map
 
@@ -119,26 +122,49 @@ def save_and_add_raster_to_map(variable, grid_values, transform, complete_path, 
         map (leafmap.Map): The updated map with the new raster layer.
     """
     
-    if variable == "LST":
-        with rasterio.open(complete_path, 'w', driver='GTiff', height=grid_values.shape[0],
-                width=grid_values.shape[1], count=7, dtype=grid_values.dtype,
-                crs='EPSG:4326', transform=transform) as dst:
-            dst.write(grid_values, 7)
-        st.success("TIF file done")
-        map.add_raster(complete_path, indexes=7, colormap='jet', layer_name=variable, opacity=1)
-    elif variable =="ALB" :
-        with rasterio.open(complete_path, 'w', driver='GTiff', height=grid_values.shape[0],
-                width=grid_values.shape[1], count=1, dtype=grid_values.dtype,
-                crs='EPSG:4326', transform=transform) as dst:
-            dst.write(grid_values, 1)
-        st.success("TIF file done")
-        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1,vmin=0, vmax=0.17)   
-    else  :
-        with rasterio.open(complete_path, 'w', driver='GTiff', height=grid_values.shape[0],
-                width=grid_values.shape[1], count=1, dtype=grid_values.dtype,
-                crs='EPSG:4326', transform=transform) as dst:
-            dst.write(grid_values, 1)
-        st.success("TIF file done")
-        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=0, vmax=40)   
+    # if variable == "LST":
+    #     write_raster_temp(path=complete_path, grid_values=grid_values, transform=transform)
+    #     map.add_raster(complete_path, indexes=7, colormap='jet', layer_name=variable, opacity=1)
+    # elif variable =="ALB" :
+    #     write_raster(path=complete_path, grid_values=grid_values, transform=transform)
+    #     map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1,vmin=0, vmax=0.17)   
+    # else  :
+    write_raster(path=complete_path, grid_values=grid_values, transform=transform)
+    map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1)   
 
     return map
+
+
+def write_raster_temp(path, grid_values, transform):
+    """
+    Function to create a raster from a dataframe
+
+    Args:
+        path  (string) : The path to take to save the raster
+        grid_values (ndarray) : containing the LST values to write the raster properly
+        transform (Affine) : Object that defines how to convert from geographic coordinates to pixel indices in a raster image.
+ 
+    """
+    with rasterio.open(path, 'w', driver='GTiff', height=grid_values.shape[0],
+                width=grid_values.shape[1], count=1, dtype=grid_values.dtype,
+                crs='EPSG:4326', transform=transform) as destination:
+            destination.write(grid_values, 7)
+    st.success("TIF file done")
+
+
+def write_raster(path, grid_values, transform):
+    """
+    Function to create a raster from a dataframe
+
+    Args:
+        path  (string) : The path to take to save the raster
+        grid_values (ndarray) : containing the LST values to write the raster properly
+        transform (Affine) : Object that defines how to convert from geographic coordinates to pixel indices in a raster image.
+ 
+    """
+    print(grid_values.dtype)
+    with rasterio.open(path, 'w', driver='GTiff', height=grid_values.shape[0],
+                width=grid_values.shape[1], count=1, dtype=grid_values.dtype,
+                crs='EPSG:4326', transform=transform) as destination:
+            destination.write(grid_values, 1)
+    st.success("TIF file done")
