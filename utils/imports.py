@@ -11,12 +11,7 @@ from rasterio.transform import from_origin
 
 import numpy as np
 import pandas as pd
-
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm 
 import plotly.graph_objects as go
-
-import wandb
 
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor

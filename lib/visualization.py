@@ -1,6 +1,6 @@
 from utils.imports import *
 
-def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
+def stat_on_prediction(pred, y_test, threshold, title: str):
     """
     Generates statistical plots to compare predictions with ground truth values and logs them to Weights and Biases (wandb).
     
@@ -134,13 +134,6 @@ def stat_on_prediction(pred, y_test, threshold, wandb_push:bool, title: str):
     st.plotly_chart( st.session_state.stat_on_pred_fig1)
     st.plotly_chart( st.session_state.stat_on_pred_fig2)
 
-    if wandb_push:
-        import wandb
-        wandb.log({
-            f"{title} - Distribution Comparison": wandb.Image(fig1),
-            f"{title} - Well Predicted vs Mispredicted": wandb.Image(fig2)
-        })
-
 
 
 def basic_visualization(X_test,y_test,model): 
@@ -162,7 +155,7 @@ def basic_visualization(X_test,y_test,model):
     # comparison_to_csv(X_test, y_test, y_pred)
         
 
-    stat_on_prediction(y_pred,y_test,threshold=0.5,wandb_push=0,title="Prediction vs Ground Truth")
+    stat_on_prediction(y_pred,y_test,threshold=0.5,title="Prediction vs Ground Truth")
 
     # Evaluation of the model
     n,k = X_test.shape
