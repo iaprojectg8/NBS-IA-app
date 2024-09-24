@@ -38,7 +38,7 @@ if uploaded_test_file:
     df = manage_csv(uploaded_file=uploaded_test_file) 
     selected_variables = st.multiselect("Chose the variable on which you want to train", options=TRAINING_LIST,default=model.feature_names_in_)
     X,y = create_X_y(df,selected_variables) 
-    st.subheader("Testing dataframe")
+    st.subheader("Testing dataset")
     st.dataframe(X, height=DATAFRAME_HEIGHT)
 
     # Scale the input data with the same scaler as during the training process 

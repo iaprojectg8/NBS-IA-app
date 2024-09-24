@@ -55,16 +55,17 @@ def create_raster(df, variable, map:leafmap.folium):
     complete_path = os.path.join(RESULT_FOLDER,filename)
 
     # Then write the raster and open them
-    if variable == "Diff_LST":
+    # if variable == "Diff_LST":
 
-        write_raster(path=complete_path, grid_values=grid_values, transform=transform)
-        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=-10,vmax=10)   
+    #     write_raster(path=complete_path, grid_values=grid_values, transform=transform)
+    #     map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=-10,vmax=10)   
 
-    else :
+    # else :
 
-        write_raster(path=complete_path, grid_values=grid_values, transform=transform)
-        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=17,vmax=43)    
-
+        # write_raster(path=complete_path, grid_values=grid_values, transform=transform)
+        # map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=17,vmax=43)    
+    min, max = write_raster(path=complete_path, grid_values=grid_values, transform=transform)
+    map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=min,vmax=max)   
 
 def write_raster(path, grid_values, transform):
     """
@@ -74,10 +75,19 @@ def write_raster(path, grid_values, transform):
         path  (string) : The path to take to save the raster
         grid_values (ndarray) : containing the LST values to write the raster properly
         transform (Affine) : Object that defines how to convert from geographic coordinates to pixel indices in a raster image.
- 
+    Returns:
+        min (float) : Minimum of temperature observed in the dataframe
+        max (float) : Maximum of temperature observed in the dataframe
     """
+    min = 0
+    max = 0
     with rasterio.open(path, 'w', driver='GTiff', height=grid_values.shape[0],
                 width=grid_values.shape[1], count=1, dtype=grid_values.dtype,
                 crs='EPSG:4326', transform=transform) as destination:
             destination.write(grid_values, 1)
+            print(np.nanmin(grid_values))
+            min = np.nanmin(grid_values)
+            print(np.nanmax(grid_values))
+            max = np.nanmax(grid_values)
     st.success("TIF file done")
+    return min, max
