@@ -15,16 +15,12 @@ def add_raster_to_map(uploaded_file, map:leafmap):
         temp_file_path = temp_file.name
 
     # Here it woul be good to make a defaut display for each of the possible variable
+    min, max = read_raster(temp_file_path)
     if "LST" in uploaded_file.name and not "pred" in uploaded_file.name and not "Diff" in uploaded_file.name :
-        map.add_raster(temp_file_path, indexes=7, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=17, vmax=44)
-
-    elif "pred" in uploaded_file.name:
-        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=17, vmax=44)
-    elif "Diff" in uploaded_file.name:
-        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=-10, vmax=10)
-
-    else :
-        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1)
+        
+        map.add_raster(temp_file_path, indexes=7, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=min, vmax=max)
+    else:
+        map.add_raster(temp_file_path, indexes=1, colormap='jet', layer_name=uploaded_file.name, opacity=1, vmin=min, vmax=max)
     
     return map
 
@@ -172,3 +168,18 @@ def write_raster(path, grid_values, transform):
     st.success("TIF file done")
     return min, max
 
+def read_raster(path):
+    """
+    Function to read a raster and return LST min and max
+
+    Args:
+        path (string) : The path to take to save the raster
+    Returns:
+        min (float) : Minimum of temperature observed in the dataframe
+        max (float) : Maximum of temperature observed in the dataframe 
+    """
+    with rasterio.open(path) as src:
+        grid_values = src.read(1)  # Assuming a single-band raster
+        min = np.nanmin(grid_values)
+        max = np.nanmax(grid_values)
+    return min, max
