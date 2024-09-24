@@ -53,17 +53,7 @@ def create_raster(df, variable, map:leafmap.folium):
     else:
         print(f"Folder already exists: {RESULT_FOLDER}")
     complete_path = os.path.join(RESULT_FOLDER,filename)
-
-    # Then write the raster and open them
-    # if variable == "Diff_LST":
-
-    #     write_raster(path=complete_path, grid_values=grid_values, transform=transform)
-    #     map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=-10,vmax=10)   
-
-    # else :
-
-        # write_raster(path=complete_path, grid_values=grid_values, transform=transform)
-        # map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=17,vmax=43)    
+  
     min, max = write_raster(path=complete_path, grid_values=grid_values, transform=transform)
     map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=min,vmax=max)   
 
