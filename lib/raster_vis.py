@@ -121,14 +121,6 @@ def save_and_add_raster_to_map(variable, grid_values, transform, complete_path, 
     Returns:
         map (leafmap.Map): The updated map with the new raster layer.
     """
-    
-    # if variable == "LST":
-    #     write_raster_temp(path=complete_path, grid_values=grid_values, transform=transform)
-    #     map.add_raster(complete_path, indexes=7, colormap='jet', layer_name=variable, opacity=1)
-    # elif variable =="ALB" :
-    #     write_raster(path=complete_path, grid_values=grid_values, transform=transform)
-    #     map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1,vmin=0, vmax=0.17)   
-    # else  :
     write_raster(path=complete_path, grid_values=grid_values, transform=transform)
     map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1)   
 

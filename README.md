@@ -7,9 +7,9 @@ This application allows you to make model that are able to predict LST. You can 
 
 ## Features
 
-- Visualize already created raster
+- Visualize already created rasters
 - Create and visualize rasters with data from dataframes
-- Train Random Forest model on dataframe
+- Train Random Forest models on your dataframe
 - See the result of the training process
 - Save the model, to keep it on your computer
 - Test your model on a future configuration of a city (with urban extension or NBS)
