@@ -99,7 +99,7 @@ def create_grid(df, variable):
     values = df[variable].values 
 
     # Make the grid knowing the pixel size
-    grid_values = griddata(points, values, (grid_y, grid_x), method='nearest')
+    grid_values = griddata(points, values, (grid_y, grid_x), method='linear')
     # This is to invert the direction of the raster which is not good
     grid_values = grid_values[::-1, :]      
 
