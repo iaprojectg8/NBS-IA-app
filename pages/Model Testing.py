@@ -55,7 +55,6 @@ if uploaded_test_file:
     
     if st.session_state.df_train is not None:
         st.subheader("Training dataset")
-        st.write(st.session_state.df_train)
 
         # Manage the case where the indices are not the same in train and test dataset in order to compare them
         df_current = st.session_state.df_train.set_index(['LAT', 'LON'])
