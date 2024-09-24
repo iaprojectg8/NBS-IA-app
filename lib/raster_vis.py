@@ -99,7 +99,7 @@ def create_grid(df, variable):
     values = df[variable].values 
 
     # Make the grid knowing the pixel size
-    grid_values = griddata(points, values, (grid_y, grid_x), method='cubic')
+    grid_values = griddata(points, values, (grid_y, grid_x), method='nearest')
     # This is to invert the direction of the raster which is not good
     grid_values = grid_values[::-1, :]      
 
@@ -121,8 +121,11 @@ def save_and_add_raster_to_map(variable, grid_values, transform, complete_path, 
     Returns:
         map (leafmap.Map): The updated map with the new raster layer.
     """
-    write_raster(path=complete_path, grid_values=grid_values, transform=transform)
-    map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1)   
+    min, max = write_raster(path=complete_path, grid_values=grid_values, transform=transform)
+    if variable=="ZONECL":
+        map.add_raster(complete_path, indexes=1, colormap='jet_r', layer_name=variable, opacity=1, vmin=min, vmax=max)  
+    else:
+        map.add_raster(complete_path, indexes=1, colormap='jet', layer_name=variable, opacity=1, vmin=min, vmax=max)  
 
     return map
 
@@ -154,9 +157,17 @@ def write_raster(path, grid_values, transform):
         transform (Affine) : Object that defines how to convert from geographic coordinates to pixel indices in a raster image.
  
     """
-    print(grid_values.dtype)
-    with rasterio.open(path, 'w', driver='GTiff', height=grid_values.shape[0],
+    min = 0
+    max = 0
+    with rasterio.open(path, 'w+', driver='GTiff', height=grid_values.shape[0],
                 width=grid_values.shape[1], count=1, dtype=grid_values.dtype,
                 crs='EPSG:4326', transform=transform) as destination:
             destination.write(grid_values, 1)
+            print(grid_values)
+            print(np.nanmin(grid_values))
+            min = np.nanmin(grid_values)
+            print(np.nanmax(grid_values))
+            max = np.nanmax(grid_values)
     st.success("TIF file done")
+    return min, max
+
