@@ -57,8 +57,10 @@ if csv_file:
     if st.session_state.save:
         
         # It saves the model
-        dump(st.session_state.model_scaler_dict, st.session_state.input_path)
-        st.session_state.save = 0
+        with st.spinner("The model is currently saved on your computer..."):
+            dump(st.session_state.model_scaler_dict, st.session_state.input_path)
+            st.session_state.save = 0
+        st.success("The model has been saved successfully")
 
 elif st.session_state.training_done:
     st.subheader("Here are the last model performances")

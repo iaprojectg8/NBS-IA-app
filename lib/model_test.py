@@ -11,8 +11,6 @@ def init_test():
     """
     st.session_state.train=0
 
-
-
 def test(X,X_train, model:RandomForestRegressor):
     """
     Make prediction with the model and data provided
