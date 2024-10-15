@@ -23,7 +23,9 @@ def test(X,X_train, model:RandomForestRegressor):
         y_pred (ndarray) : LST predicted by the model on the future observations
         y_train_pred (ndarray) : LST prediction by the model on the current observation
     """
+    print("make prediction on the future")
     y_pred = model.predict(X)
+    print("make prediction on the current")
     y_train_pred = model.predict(X_train)
     
     return y_pred, y_train_pred

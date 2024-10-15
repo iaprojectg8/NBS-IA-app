@@ -3,7 +3,36 @@ G8_LOGO_PATH = "logo/Logo_G8.png"
 KERAN_LOGO_PATH = "logo/Logo_Keran.png"
 DATAFRAME_HEIGHT = 200
 SAVE_PATH = "model_location.txt"
-MODEL_FILE = "rdf_model.joblib"
+MODEL_FILE_RDF = "rdf_model.joblib"
+MODEL_FILE_NN = "nn_model.keras"
+MODEL_FILE_SCALER = "scaler_nn.joblib"
 RESULT_FOLDER = "Results"
 VARIABLES_LIST = ["LST","LAT", "LON", "LS1","LS2","LS3","LS4","LS5","LS6","OCCSOL","URB","ALT","EXP","PENTE","NATSOL","NATSOL2","HAUTA","CATHYD","ZONECL","ALB"]
 TRAINING_LIST = ["LAT", "LON","OCCSOL","NATSOL","NATSOL2","HAUTA","CATHYD","ZONECL","ALB"]
+
+MODELS_FOLDER="model/"
+
+# Model path variables
+BEST_MODEL_CLASS = "best_model_class.keras"
+BEST_MODEL_PATH_CLASS = MODELS_FOLDER + BEST_MODEL_CLASS
+BEST_MODEL_REG = "best_model_reg.keras"
+BEST_MODEL_PATH_REG = MODELS_FOLDER + BEST_MODEL_REG
+
+# Scaler path
+MODEL_SCALER_CLASS = "scaler_class.joblib"
+MODEL_SCALER_PATH_CLASS = MODELS_FOLDER + MODEL_SCALER_CLASS
+MODEL_SCALER_REG = "scaler_reg.joblib"
+MODEL_SCALER_PATH_REG = MODELS_FOLDER + MODEL_SCALER_REG
+
+
+# history path
+HISTORY_CLASS = "history_class.json"
+MODEL_HISTORY_CLASS = MODELS_FOLDER + HISTORY_CLASS
+HISTORY_REG = "history_reg.json"
+MODEL_HISTORY_REG = MODELS_FOLDER + HISTORY_REG
+
+# config path
+CONFIG_CLASS = "config_class.json"
+MODEL_CONFIG_CLASS = MODELS_FOLDER + CONFIG_CLASS
+CONFIG_REG = "config_reg.json"
+MODEL_CONFIG_REG = MODELS_FOLDER + CONFIG_REG

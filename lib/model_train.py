@@ -1,6 +1,7 @@
 from utils.imports import *
 from lib.visualization import basic_visualization
 from lib.callbacks import callback_exit, callback_save
+from utils.variables import MODEL_FILE_RDF, MODEL_FILE_NN, MODEL_FILE_SCALER
 
 
 def init_train():
@@ -9,7 +10,7 @@ def init_train():
     """
     st.session_state.test = 0
 
-def rdf_regressor(X, y, estimator, test_size):
+def train_rdf_regressor(X, y, estimator, test_size):
     """
     Performs a random forest regression.
 
@@ -45,34 +46,51 @@ def rdf_regressor(X, y, estimator, test_size):
 
     # Visualization of the result graphs    
     basic_visualization(X_test=X_test, y_test=y_test, model = rf_model)
+    return rf_model, scaler
     
-    # Put the scaler with the model to unpack it with the model at the wanted moment.
-    model_scaler_dict = {
-        'model': rf_model,
-        'scaler': scaler
-    }
-    st.session_state.model_scaler_dict = model_scaler_dict
     
-    return model_scaler_dict
-
-
 
 def display_all_precedent_training_graphs():
     """
     Displays the graphs even after the trains to keep a record
     """
+
+    if all(value is not None for value in [st.session_state.loss_history, st.session_state.mae_history, st.session_state.lr_history]):
+    # Do something
+        print("i am here bro i don't know why ")
+        st.plotly_chart(st.session_state.loss_history)
+        st.plotly_chart(st.session_state.mae_history) 
+        st.plotly_chart(st.session_state.lr_history)
+
     st.plotly_chart(st.session_state.stat_on_pred_fig1)
     st.plotly_chart(st.session_state.stat_on_pred_fig2)
     st.plotly_chart(st.session_state.results_fig1)
     st.plotly_chart(st.session_state.results_fig2)
 
+    
 
-def save_model():
+def model_save(model_chosen:str):
     """
     Update the model path and display the button to save the model
     """
-    
-    st.text_input("Folder path", key='input_path',value=st.session_state.input_path)
-    st.button("Save model", on_click=callback_save)
-    st.button("Exit", on_click=callback_exit)
-    
+    working_dir = os.getcwd()
+    model_path = os.path.join(working_dir, "model")
+         
+    if "forest" in model_chosen.lower():
+        
+        st.session_state.model_path = os.path.join(model_path, MODEL_FILE_RDF)
+        st.session_state.model_saving_config = st.session_state.model_scaler_dict 
+        
+        st.text_input("Model path", key='input_path',value=st.session_state.model_path)
+        st.button("Save model", on_click=callback_save)
+        st.button("Exit", on_click=callback_exit)
+    else:
+        st.session_state.model_path = os.path.join(model_path, MODEL_FILE_NN)
+        st.session_state.scaler_path = os.path.join(model_path, MODEL_FILE_SCALER)
+        st.session_state.model_saving_config = copy(st.session_state.model_scaler_dict)
+        st.session_state.model_saving_config.pop("model")
+        st.text_input("Model path", key='input_path',value=st.session_state.model_path)
+        st.text_input("Scaler path", value = st.session_state.scaler_path)
+        st.button("Save model", on_click=callback_save)
+        st.button("Exit", on_click=callback_exit)
+

@@ -17,73 +17,79 @@ init_test()
 # Information given about the model trained or uploaded
 if st.session_state.model_scaler_dict:
     st.write("You don't have to load your model, it is already in memory and here is a brief description of it")
-    st.write(f"Model used: `{st.session_state.model_scaler_dict["model"]}`")
+    print(st.session_state.model_scaler_dict)
+    if "model" in st.session_state.model_scaler_dict:
+        st.write(f"Model used: `{st.session_state.model_scaler_dict["model"]}`")
+    
     st.write(f"Scaler used: `{str(st.session_state.model_scaler_dict["scaler"])}`")
+    st.button("Reset a model", on_click=callback_reset_model)
 
 else:
     uploaded_model = upload_model_file()
     if uploaded_model:
-        st.session_state.model_scaler_dict = load_model(uploaded_file=uploaded_model)
+        
+        st.session_state.model_scaler_dict = load_model_dict(uploaded_file=uploaded_model)
 
-
+print(st.session_state.model_scaler_dict)
 # Simplify the variable
+uploaded_test_file = None
 if "model" in st.session_state.model_scaler_dict and "scaler" in st.session_state.model_scaler_dict:
     model = st.session_state.model_scaler_dict["model"]
     scaler = st.session_state.model_scaler_dict["scaler"]
+    train_variables = st.session_state.model_scaler_dict["selected_variables"]
 
-
-uploaded_test_file = upload_test_file()
+    uploaded_test_file = upload_test_file()
 if uploaded_test_file:
         
-    df = manage_csv(uploaded_file=uploaded_test_file) 
-    selected_variables = st.multiselect("Chose the variable on which you want to train", options=TRAINING_LIST,default=model.feature_names_in_)
-    X,y = create_X_y(df,selected_variables) 
-    st.subheader("Testing dataset")
+    df_future = manage_csv(uploaded_file=uploaded_test_file) 
+    selected_variables = st.multiselect("Chose the variable on which you want to train", options=TRAINING_LIST,default=train_variables)
+    X,y = create_X_y(df_future,selected_variables) 
+    st.subheader("Future dataset")
     st.dataframe(X, height=DATAFRAME_HEIGHT)
 
     # Scale the input data with the same scaler as during the training process 
     X_scaled = scaler.transform(X)
 
-    if st.session_state.df_train is not None:
-        st.write("Your training dataframe is already in memory so you don't need to upload it")
-        
-    else:
-        uploaded_training_file = upload_training_file()
-        if uploaded_training_file:
-            st.session_state.df_train = manage_csv(uploaded_file=uploaded_training_file)
-        
+    df_current= pd.DataFrame()
+    uploaded_training_file = upload_training_file()
+
+    if uploaded_training_file:
+
+        df_current = manage_csv(uploaded_file=uploaded_training_file)
+        st.subheader("Current dataset")
     
-    if st.session_state.df_train is not None:
-        st.subheader("Training dataset")
+        if df_current.shape == df_future.shape:
 
-        # Manage the case where the indices are not the same in train and test dataset in order to compare them
-        df_current = st.session_state.df_train.set_index(['LAT', 'LON'])
-        df_future = df.set_index(['LAT', 'LON'])
-        reordered_df = df_current.reindex(df_future.index)
-        reordered_df = reordered_df.reset_index()
+            X_train_scaled = scale_X_train(df_future, df_current, selected_variables, scaler)
+        else :
+            st.warning("The current file you chose does not correspond to the future file in terms of shape  \n\
+                    To be able to test your model you need to have both current and future CSV file of the zone")
+            
+        
+        st.button("Test your model", on_click=callback_test)
     
-        X_train,y_train = create_X_y(reordered_df, selected_variables)
-        st.dataframe(X_train, height=DATAFRAME_HEIGHT)
-        X_train_scaled = scaler.transform(X_train)
-       
-    st.button("Test your model", on_click=callback_test)
 
-    if st.session_state.test:
-        map = leafmap.Map()
-        y_pred, y_train_pred = test(X_scaled, X_train_scaled, model=model)
+        if st.session_state.test and df_future.shape == df_current.shape:
+            map = leafmap.Map()
 
-        # Creating new_fields
-        df["LST_pred"] = y_train_pred
-        df["LST_pred_fut"] = y_pred
-        df["Diff_LST"] =  y_pred - y_train_pred
 
-        # Show the map with all the raster when they are created
-        with st.status("Creating the rasters...",expanded=True):
-            st.write("Current LST prediction...")
-            create_raster(df=df, variable="LST_pred",map=map)
-            st.write("Future LST prediction...")
-            create_raster(df=df, variable="LST_pred_fut",map=map)
-            st.write("Difference between both...")
-            create_raster(df=df, variable="Diff_LST", map=map)
-            map.to_streamlit()
-     
+            # Show the map with all the raster when they are created
+            with st.status("Creating the rasters...",expanded=True):
+
+                # Making the 
+                st.write("Making the prediction on current and the future set to compare them")
+                y_pred, y_train_pred = test(X_scaled, X_train_scaled, model=model)
+                # Creating new_fields
+                st.write("Inserting prediction in the main dataframe")
+                df_future["LST_pred"] = y_train_pred
+                df_future["LST_pred_fut"] = y_pred
+                df_future["Diff_LST"] =  y_pred - y_train_pred
+                print(df_future)
+                st.write("Current LST prediction...")
+                create_raster(df=df_future, variable="LST_pred",map=map)
+                st.write("Future LST prediction...")
+                create_raster(df=df_future, variable="LST_pred_fut",map=map)
+                st.write("Difference between both...")
+                create_raster(df=df_future, variable="Diff_LST", map=map)
+                map.to_streamlit()
+        

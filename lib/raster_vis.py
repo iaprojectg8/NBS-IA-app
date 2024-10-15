@@ -10,7 +10,7 @@ def add_raster_to_map(uploaded_file, map:leafmap):
         map (leafmap) : map to display the raster on
     """
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".tif") as temp_file:
+    with tempfile.NamedTemporaryFile(delete=True, suffix=".tif") as temp_file:
         temp_file.write(uploaded_file.read())
         temp_file_path = temp_file.name
 

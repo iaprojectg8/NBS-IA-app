@@ -242,7 +242,7 @@ def basic_visualization(X_test,y_test,model):
         x=y_test,
         y=y_pred,
         mode='markers',
-        name=f'R2 = {r2:.2f}       R2*= {adjusted_r2:.2f}\nMSE = {mse:.2f}    MAE = {mae:.2f}',
+        name=f'R2 = {r2:.2f}       R2*= {adjusted_r2:.2f}       MSE = {mse:.2f}    MAE = {mae:.2f}',
         marker=dict(color=' rgb(0,191,255, 1)', size=8)
     )
 
@@ -285,3 +285,122 @@ def basic_visualization(X_test,y_test,model):
     st.session_state.results_fig2 = fig2
     st.plotly_chart(fig1)
     st.plotly_chart(fig2)
+
+
+
+def loss_and_metrics_vis(history):
+    """
+    Visualizes the training history of a model, including loss, MAE/accuracy, and learning rate progression.
+
+    Parameters:
+    history (dict): Dictionary containing the training history (loss, mae/accuracy, learning rate).
+
+    Returns:
+    None
+    """
+    # Combine the history if it's spread over multiple epochs
+    
+
+    # Plotting Training and Validation Loss
+    fig_loss = go.Figure()
+    fig_loss.add_trace(go.Scatter(
+        x=list(range(len(history['loss']))),
+        y=history['loss'], 
+        mode='lines', 
+        name='Training Loss'))
+    
+    fig_loss.add_trace(go.Scatter(
+        x=list(range(len(history['val_loss']))), 
+        y=history['val_loss'], 
+        mode='lines', name='Validation Loss'))
+    
+    fig_loss.update_layout(title="Model Loss", 
+                           xaxis_title="Epoch", 
+                           yaxis_title="Loss",
+                           legend=dict(
+                                font=dict(size=10),  # Adjust the legend font size
+                                orientation="v",  # Horizontal legend
+                                yanchor="auto",  # Push the legend below the plot
+                                xanchor="auto",  # Center the legend
+                                bgcolor='rgba(0, 0, 0, 0)'),)
+    
+    # Display the loss plot in Streamlit
+    st.plotly_chart(fig_loss)
+    st.session_state.loss_history = fig_loss
+    
+
+    # Plotting Training and Validation MAE/Accuracy
+    fig_mae = go.Figure()
+    if "mae" in history.keys():
+        fig_mae.add_trace(go.Scatter(
+            x=list(range(len(history['mae']))), 
+            y=history['mae'], 
+            mode='lines', 
+            name='Training MAE'))
+        
+        fig_mae.add_trace(go.Scatter(
+            x=list(range(len(history['val_mae']))), 
+            y=history['val_mae'], 
+            mode='lines', 
+            name='Validation MAE'))
+        
+        fig_mae.update_layout(
+            title="Model MAE", 
+            xaxis_title="Epoch", 
+            yaxis_title="MAE",
+            legend=dict(
+                    font=dict(size=10),  # Adjust the legend font size
+                    orientation="v",  # Horizontal legend
+                    yanchor="auto",  # Push the legend below the plot
+                    xanchor="auto",  # Center the legend
+                    bgcolor='rgba(0, 0, 0, 0)'),)
+    else:
+        fig_mae.add_trace(go.Scatter(
+            x=list(range(len(history['accuracy']))), 
+            y=history['accuracy'], 
+            mode='lines', 
+            name='Training Accuracy'))
+        
+        fig_mae.add_trace(go.Scatter(
+            x=list(range(len(history['val_accuracy']))), 
+            y=history['val_accuracy'], 
+            mode='lines', 
+            name='Validation Accuracy'))
+        
+        fig_mae.update_layout(
+            title="Model Accuracy", 
+            xaxis_title="Epoch", 
+            yaxis_title="Accuracy")
+    
+    # Display the MAE/Accuracy plot in Streamlit
+    st.session_state.mae_history = fig_mae
+    st.plotly_chart(fig_mae)
+
+    # Plotting Learning Rate Progression
+    fig_lr = go.Figure()
+    fig_lr.add_trace(go.Scatter(
+        x=list(range(len(history['learning_rate']))), 
+        y=history['learning_rate'], 
+        mode='lines', 
+        name='Learning Rate',
+        showlegend=True))
+    
+    fig_lr.update_layout(
+        title="Learning Rate Progression", 
+        xaxis_title="Epoch", 
+        yaxis_title="Learning Rate (log scale)",
+        legend=dict(
+                font=dict(size=10),  # Adjust the legend font size
+                orientation="v",  # Horizontal legend
+                yanchor="auto",  # Push the legend below the plot
+                xanchor="auto",  # Center the legend
+                bgcolor='rgba(0, 0, 0, 0)'),)
+    
+    fig_lr.update_yaxes(
+        type='log',
+        tickformat='.0e',)
+
+    # Display the learning rate plot in Streamlit
+    st.plotly_chart(fig_lr)
+    st.session_state.lr_history = fig_lr
+

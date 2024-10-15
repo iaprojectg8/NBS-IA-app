@@ -1,16 +1,17 @@
 from utils.imports import *
-from utils.variables import MODEL_FILE, TRAINING_LIST
+from utils.variables import  TRAINING_LIST
 
 
 # Initialize the input path to save the model
 
-if "input_path" not in st.session_state:
-    working_dir = os.getcwd()
-    model_path = os.path.join(working_dir, "model")
-    if "model" not in os.listdir(working_dir):
-        os.mkdir("model")        
+if "model_path" not in st.session_state:
     
-    st.session_state.input_path = os.path.join(model_path, MODEL_FILE)
+    if "model" not in os.listdir(os.getcwd()):
+        os.mkdir("model") 
+    st.session_state.model_path = str()
+
+if "scaler_path" not in st.session_state:
+    st.session_state.scaler_path = str()
 
 # Session variables to keep the model in memory
 
@@ -51,7 +52,16 @@ if "results_fig1" not in st.session_state:
 if "results_fig2" not in st.session_state:    
     st.session_state.results_fig2 = None
 
+if "loss_history" not in st.session_state:
+    st.session_state.loss_history = None
 
+if "mae_history" not in st.session_state:
+    st.session_state.mae_history = None
+
+if "lr_history" not in st.session_state:
+    st.session_state.lr_history = None
+
+st.session_state.lr_history
 # Session varialbe useful to know if a train process has already been done to display the graphs
 
 if "training_done" not in st.session_state: 
@@ -61,3 +71,17 @@ if "training_done" not in st.session_state:
 
 if "df_train" not in st.session_state:
     st.session_state.df_train = None
+
+
+# New variable that came with the arrival of the neural net implementation
+if "stop_train" not in st.session_state:
+    st.session_state.stop_train = 0
+
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+if "model" not in st.session_state:
+    st.session_state.model = None
+
+if "model_saving_config" not in st.session_state:
+    st.session_state.model_saving_config = dict()
