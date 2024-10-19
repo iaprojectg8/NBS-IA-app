@@ -25,7 +25,6 @@ def train_rdf_regressor(X, y, estimator, test_size):
     with st.status("Model Training...",expanded=True):
         # Split the dataset
         st.write("Splitting the dataset...")
-        print(X)
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size , random_state=42)
         
         # Fit the scaler to your data and transform the data
@@ -57,7 +56,6 @@ def display_all_precedent_training_graphs():
 
     if all(value is not None for value in [st.session_state.loss_history, st.session_state.mae_history, st.session_state.lr_history]):
     # Do something
-        print("i am here bro i don't know why ")
         st.plotly_chart(st.session_state.loss_history)
         st.plotly_chart(st.session_state.mae_history) 
         st.plotly_chart(st.session_state.lr_history)
