@@ -23,9 +23,9 @@ def test(X,X_train, model:RandomForestRegressor):
         y_pred (ndarray) : LST predicted by the model on the future observations
         y_train_pred (ndarray) : LST prediction by the model on the current observation
     """
-    print("make prediction on the future")
+    print("Make prediction on the future...")
     y_pred = model.predict(X)
-    print("make prediction on the current")
+    print("Make prediction on the current...")
     y_train_pred = model.predict(X_train)
     
     return y_pred, y_train_pred
@@ -44,12 +44,13 @@ def create_raster(df, variable, map:leafmap.folium):
     """
     filename = f"{variable}.tif"
     _, lat_max, lon_min, _ = get_min_max(df)
-    grid_values, pixel_size = create_grid(df,variable=variable)
-    transform = from_origin(lon_min, lat_max, pixel_size, pixel_size)
+    grid_values, pixel_size_lat, pixel_size_lon = create_grid(df,variable=variable)
+    transform = from_origin(lon_min, lat_max, pixel_size_lon, pixel_size_lat)
 
     # Verify that the result folder exists
     if not os.path.exists(RESULT_FOLDER):
         os.makedirs(RESULT_FOLDER)
+
     else:
         print(f"Folder already exists: {RESULT_FOLDER}")
     complete_path = os.path.join(RESULT_FOLDER,filename)
@@ -75,9 +76,7 @@ def write_raster(path, grid_values, transform):
                 width=grid_values.shape[1], count=1, dtype=grid_values.dtype,
                 crs='EPSG:4326', transform=transform) as destination:
             destination.write(grid_values, 1)
-            print(np.nanmin(grid_values))
             min = np.nanmin(grid_values)
-            print(np.nanmax(grid_values))
             max = np.nanmax(grid_values)
     st.success("TIF file done")
     return min, max
