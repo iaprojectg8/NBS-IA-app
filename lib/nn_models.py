@@ -5,9 +5,34 @@ from lib.visualization import *
 from lib.callbacks import *
 
 
-
 class ManualLearningRateScheduler:
+    """
+    Custom scheduler for adjusting the learning rate of a model's optimizer based on validation loss.
+
+    The learning rate is reduced by a set factor if the validation loss does not improve after a specified 
+    number of epochs (`patience`). This process allows for better convergence during training by decreasing 
+    the learning rate when improvements slow down, while ensuring the learning rate does not fall below 
+    a specified minimum value (`min_lr`).
+
+    Attributes:
+        model (tf.keras.Model): The neural network model whose optimizer’s learning rate will be adjusted.
+        patience (int): Number of epochs to wait for improvement in loss before reducing the learning rate.
+        factor (float): Reduction factor to apply to the learning rate if no improvement is seen.
+        min_lr (float): Minimum allowable learning rate; if reached, training can be flagged to stop.
+        wait (int): Counter for the number of consecutive epochs without improvement.
+        best_loss (float): The lowest validation loss observed, used to track improvements in model performance.
+    """
+
     def __init__(self, model, patience=5, factor=10, min_lr=1e-7):
+        """
+        Initializes the learning rate scheduler with specified parameters and counters.
+        
+        Parameters:
+            model (tf.keras.Model): The model with an optimizer whose learning rate will be adjusted.
+            patience (int, optional): Number of epochs to wait for improvement before adjusting the learning rate.
+            factor (float, optional): Factor by which to reduce the learning rate when no improvement is seen.
+            min_lr (float, optional): Minimum allowable learning rate before stopping training.
+        """
         self.model = model
         self.patience = patience  # How many epochs to wait before reducing the LR
         self.factor = factor      # Factor by which to reduce the LR
@@ -16,7 +41,18 @@ class ManualLearningRateScheduler:
         self.best_loss = float('inf')
 
     def adjust_learning_rate(self, current_loss):
-        """Adjust learning rate if validation loss doesn't improve."""
+        """
+        Adjusts the model's learning rate if the validation loss does not improve.
+        
+        Parameters:
+            current_loss (float): The current validation loss to compare against `best_loss`.
+        
+        Behavior:
+            - If `current_loss` is lower than `best_loss`, updates `best_loss` and resets `wait`.
+            - If `current_loss` is not lower, increments `wait`. When `wait` reaches `patience`,
+              the learning rate is reduced by dividing by `factor`. If the new learning rate 
+              drops below `min_lr`, training is flagged to stop.
+        """
         if current_loss < self.best_loss:
             self.best_loss = current_loss
             self.wait = 0
@@ -40,23 +76,27 @@ class ManualLearningRateScheduler:
 
 class NNRegressionModel(tf.keras.Model):
     """
-    Base model class for building and training neural network models.
+    Base model class for building and training neural network models for regression tasks.
 
-    This class is the base of all dense models that will be made. The architecture and the hyper parameters will be changeable
-    in the child classes.
+    This class provides a configurable base for dense neural network models, where architecture 
+    and hyperparameters can be customized in child classes.
 
     Attributes:
         input_shape (tuple): Shape of the input data.
-        config (dict): Configuration dictionary with model parameters.
-        model (tf.keras.Model): Keras model built using the provided configuration.
+        config (dict): Configuration dictionary with model parameters, including architecture,
+                       optimizer settings, and training hyperparameters.
+        model (tf.keras.Model): Compiled Keras model built using the provided configuration.
+        model_path (str): Path to save the best model during training.
     """
 
     def __init__(self, config=None, **kwargs):
         """
-        Initializes the BaseModel.
+        Initializes the NNRegressionModel with the given configuration.
 
         Args:
-            config (dict): Configuration dictionary with model parameters.
+            config (dict): Configuration dictionary with model parameters like optimizer, loss function,
+                           layer configurations, and training parameters.
+            **kwargs: Additional arguments for the parent tf.keras.Model class.
         """
         super().__init__(**kwargs)
         self.model_path = BEST_MODEL_PATH_REG  # Replace with actual path
@@ -64,7 +104,18 @@ class NNRegressionModel(tf.keras.Model):
         self.model = None  # Initialize the model attribute
 
     def add_dense_block(self, units):
-        """Adds a dense block to the model."""
+        """
+        Adds a dense block (layer group) to the model.
+
+        Args:
+            units (int): Number of neurons in the dense layer.
+        
+        Block includes:
+            - Dense layer
+            - Batch normalization
+            - ELU activation with alpha specified in config
+            - Dropout layer with dropout rate specified in config
+        """
         self.model.add(layers.Dense(units))
         self.model.add(layers.BatchNormalization())
         self.model.add(layers.ELU(alpha=self.config["alpha_elu"]))
@@ -72,7 +123,15 @@ class NNRegressionModel(tf.keras.Model):
         self.model.add(visualkeras.SpacingDummyLayer(spacing=40))
 
     def build_model(self, input_shape):
-        """Builds the neural network model."""
+        """
+        Constructs and compiles the neural network model.
+
+        Args:
+            input_shape (tuple): Shape of the model's input data.
+        
+        Returns:
+            tf.keras.Model: Compiled Keras model instance.
+        """
         self.model = models.Sequential()  # Initialize the Sequential model
 
         self.model.add(layers.Input(shape=input_shape))
@@ -93,21 +152,38 @@ class NNRegressionModel(tf.keras.Model):
 
         return self.model
     
-    # def compile(self, optimizer, loss, metrics):
-    #     self.model.compile( optimizer, loss, metrics)
+
     def summary(self):
+        """Displays the model summary."""
         return self.model.summary()
     
     def save(self, model_path):
+        """
+        Saves the model to the specified path.
+
+        Args:
+            model_path (str): File path for saving the model.
+        """
         return self.model.save(model_path)
         
     def upload_model_archi(self):
-        """Uploads the model architecture visualization to Weights & Biases (Wandb)."""
+        """
+        Uploads the model architecture visualization to Weights & Biases (Wandb).
+        
+        Visualization settings include layer dimensions, spacing, padding, and display options.
+        """
         vis_net = visualkeras.layered_view(self.model, min_xy=20, max_xy=4000, min_z=20, max_z=4000, padding=100, scale_xy=5, scale_z=20, spacing=20, one_dim_orientation='x', legend=True, draw_funnel=True)
         st.image(vis_net, caption="Network Architecture", use_column_width=True)
 
     def get_callbacks(self):
-        """Gets the list of callbacks for model training."""
+        """
+        Configures callbacks for model training, including:
+            - ReduceLROnPlateau: Reduces learning rate on plateau.
+            - ModelCheckpoint: Saves the best model based on specified metric.
+        
+        Returns:
+            list: List of configured Keras callbacks.
+        """
         return [
             callbacks.ReduceLROnPlateau(
                 monitor=self.config["monitor"],
@@ -115,21 +191,28 @@ class NNRegressionModel(tf.keras.Model):
                 patience=self.config["reduce_lr_patience"],
                 min_lr=self.config["min_lr"]
             ),
-            # callbacks.EarlyStopping(
-            #     monitor=self.config["monitor"],
-            #     mode='min',
-            #     patience=self.config["early_stopping_patience"],
-            #     restore_best_weights=True  # Change to True to restore best weights
-            # ),
-            # callbacks.ModelCheckpoint(
-            #     filepath=self.model_path,
-            #     monitor=self.config["metrics"][0],
-            #     save_best_only=True
-            # ),
+            callbacks.ModelCheckpoint(
+                filepath=self.model_path,
+                monitor=self.config["metrics"][0],
+                save_best_only=True
+            ),
         ]
 
     def train(self, X_train, y_train, X_val, y_val):
-        """Trains the model and returns it with the history logs."""
+        """
+        Trains the model on provided training and validation data.
+
+        Args:
+            X_train (np.ndarray): Training data features.
+            y_train (np.ndarray): Training data targets.
+            X_val (np.ndarray): Validation data features.
+            y_val (np.ndarray): Validation data targets.
+
+        Returns:
+            tuple: Trained model and training history logs.
+        
+        Logs training metrics to a progress bar and saves metrics to session state.
+        """
         if "metrics_df" not in st.session_state:
             st.session_state.metrics_df = pd.DataFrame(columns=['Loss', 'MAE', 'Val Loss', 'Val MAE', 'Learning Rate'])
 
@@ -183,12 +266,16 @@ class NNRegressionModel(tf.keras.Model):
 
         return self.model, history
 
-    def evaluate(self, X_test, y_test):
-        """Evaluates the model on test data."""
-        return self.model.evaluate(X_test, y_test)
-
     def predict(self, X):
-        """Makes predictions using the model."""
+        """
+        Makes predictions on the input data.
+
+        Args:
+            X (np.ndarray): Data for which to make predictions.
+
+        Returns:
+            np.ndarray: Model predictions.
+        """
         return self.model.predict(X)
     
 
@@ -277,26 +364,23 @@ def train_nn(X,y,epochs, test_size, val_size):
     # Scale the data    
     scaler = StandardScaler()
     X_train, X_test, X_val, scaler = scale_data(X_train, X_test, X_val, scaler)   
-    print(X_train.shape)
     input_shape = (X_train.shape[1],)
     
     # Model init
     if not st.session_state.stop_train : 
         st.session_state.model = NNRegressionModel(config=config)
-        print("Not in the class",st.session_state.model)
         st.session_state.model.build_model(input_shape=input_shape)
         print("After the build",st.session_state.model.summary())
-        print(st.session_state.model)
+    
         
-        print("Training the model...")
+        print("Training the model...")   
         st.button("Stop training the neural network right now", on_click=callback_stop_train)
         st.session_state.model.train(X_train, y_train, X_val, y_val)  
         
 
     st.session_state.stop_train = 0
     history = compute_history(st.session_state.history)
-    print(history)
-    # print(st.session_state.model.summary())
+    
     save_history(history,MODEL_HISTORY_REG)
     loss_and_metrics_vis(history)
     basic_visualization(X_test=X_test, y_test=y_test, model=st.session_state.model)
