@@ -10,9 +10,10 @@ def add_raster_to_map(uploaded_file, map:leafmap):
         map (leafmap) : map to display the raster on
     """
 
-    with tempfile.NamedTemporaryFile(delete=True, suffix=".tif") as temp_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".tif") as temp_file:
         temp_file.write(uploaded_file.read())
         temp_file_path = temp_file.name
+
 
     # Here it woul be good to make a defaut display for each of the possible variable
     min, max = read_raster(temp_file_path)
@@ -39,19 +40,24 @@ def create_rasters_needs(df,filename):
         transform (Affine): Affine transformation object for georeferencing the raster.
         complete_path (str): Complete file path for the raster to be saved.
     """
-    variable = filename.split("_")[0]
+    # variable = filename.split("_")[0]
+    variable = "_".join(filename.split("_")[0:-1])
     lat_min, lat_max, lon_min, lon_max = get_min_max(df)
-    grid_values, pixel_size = create_grid(df,variable=variable)
-    transform = from_origin(lon_min, lat_max, pixel_size, pixel_size)
+    grid_values, pixel_size_lat, pixel_size_lon = create_grid(df,variable=variable)
+    transform = from_origin(lon_min, lat_max,pixel_size_lon,  pixel_size_lat)
 
     # Check if the remake folder exists, if not, create it
     if not os.path.exists(REMAKE_FOLDER):
         os.makedirs(REMAKE_FOLDER)
     else:
         print(f"Folder already exists: {REMAKE_FOLDER}")
+        shutil.rmtree(REMAKE_FOLDER)
+        os.makedirs(REMAKE_FOLDER)
     complete_path = os.path.join(REMAKE_FOLDER,filename)
 
     return variable, grid_values, transform, complete_path
+
+
 
 def get_min_max(df):
     """
@@ -85,22 +91,23 @@ def create_grid(df, variable):
 
     Returns:
         grid_values (np.array): Grid of interpolated values based on LAT, LON, and the variable.
-        pixel_size (float): The average pixel size based on latitude differences.
+        pixel_size_lat (float): The average pixel size based on latitude differences.
+        pixel_size_lon (float): The average pixel size based on longitude differences.
     """ 
     lat_unique, lon_unique = sorted(df['LAT'].unique()), sorted(df['LON'].unique()) 
-    pixel_size = np.mean(pd.DataFrame(lat_unique).diff())
+    pixel_size_lat = np.mean(pd.DataFrame(lat_unique).diff())
+    pixel_size_lon = np.mean(pd.DataFrame(lon_unique).diff())
     grid_x, grid_y = np.meshgrid(lon_unique, lat_unique)
 
     points = df[['LAT', 'LON']].values
-    values = df[variable].values 
+    values = df[variable].values
 
     # Make the grid knowing the pixel size
-    grid_values = griddata(points, values, (grid_y, grid_x), method='linear')
-    # This is to invert the direction of the raster which is not good
+    grid_values = griddata(points, values, (grid_y, grid_x), method='linear', fill_value=np.nan)
     grid_values = grid_values[::-1, :]      
 
 
-    return grid_values, pixel_size
+    return grid_values, pixel_size_lat, pixel_size_lon
 
 
 def save_and_add_raster_to_map(variable, grid_values, transform, complete_path, map):
@@ -161,9 +168,8 @@ def write_raster(path, grid_values, transform):
                 width=grid_values.shape[1], count=1, dtype=grid_values.dtype,
                 crs='EPSG:4326', transform=transform) as destination:
             destination.write(grid_values, 1)
-            print(np.nanmin(grid_values))
+
             min = np.nanmin(grid_values)
-            print(np.nanmax(grid_values))
             max = np.nanmax(grid_values)
     st.success("TIF file done")
     return min, max
