@@ -75,13 +75,10 @@ def load_model_dict(uploaded_file):
             # Write the uploaded file content to the temp file
             temp_file.write(uploaded_file.read())
             temp_file_path = temp_file.name
-        print(temp_file_path)
+
         model = load_model(temp_file_path)
-        print("model summary")
-        print(model)
-        print("removing")
+        print("Removing temporary file...")
         os.remove(temp_file_path)
-        print("file removed")
         uploaded_scaler = uplaod_scaler_variable()
      
         if uploaded_scaler:
@@ -125,28 +122,47 @@ def manage_csv(uploaded_file):
     Returns:
         df (pd.Dataframe) : dataframe containing all the variables
     """
-    with tempfile.NamedTemporaryFile(delete=True, suffix=".csv") as temp_file:
-        file = BytesIO(uploaded_file.read())
+    
+    file = BytesIO(uploaded_file.read())
     df = pd.read_csv(file)
     
     return df
 
 
 def check_shape(df):
+    """
+    Checks if the shape of the provided DataFrame matches the training DataFrame shape stored in session state.
+
+    Args:
+        df (pd.DataFrame): DataFrame to check.
+    """
     if st.session_state.df_train.shape != df.shape:
         st.write("The current file you chose does not correspond to the future file in terms of shape")
     
 
 
-def scale_X_train(df_future, df_current, selected_variables, scaler):
+def scale_X_current(df_future, df_current, selected_variables, scaler):
+    """
+    Apply the scaler to the current data 
+
+    Args:
+        df_future (pd.DataFrame): Future data DataFrame containing target indices and variables for alignment.
+        df_current (pd.DataFrame): Current data DataFrame to be scaled and used for training.
+        selected_variables (list): List of variable names to include in X_train.
+        scaler (sklearn.preprocessing.StandardScaler): Pre-fitted scaler for scaling the training data.
+
+    Returns:
+        np.ndarray: Scaled training data (X_train_scaled).
+    """
+    # Set the index to the same as the future dataset for both to be comparables
     df_current = df_current.set_index(['LAT', 'LON'])
     df_future = df_future.set_index(['LAT', 'LON'])
     reordered_df = df_current.reindex(df_future.index)
     reordered_df = reordered_df.reset_index()
 
-    X_train,y_train = create_X_y(reordered_df, selected_variables)
-    print(X_train)
-    st.dataframe(X_train, height=DATAFRAME_HEIGHT)
-    X_train_scaled = scaler.transform(X_train)
+    {}
+    X_current,_ = create_X_y(reordered_df, selected_variables)
+    st.dataframe(X_current, height=DATAFRAME_HEIGHT)
+    X_current_scaled = scaler.transform(X_current)
 
-    return X_train_scaled
+    return X_current_scaled
