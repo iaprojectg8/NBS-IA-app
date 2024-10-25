@@ -30,3 +30,4 @@ import json
 import logging
 from io import BytesIO
 from copy import copy
+import shutil

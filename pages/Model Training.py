@@ -72,7 +72,6 @@ if csv_file:
         # If you want to save you model
         st.write("Your model is in memory you can go to the test page and try to predict on some other data")
         model_save(model_chosen)
-        print(st.session_state.model_scaler_dict["model"].get_config())
         st.session_state.training_done = 1
         st.session_state.train = 0
 

@@ -17,7 +17,6 @@ init_test()
 # Information given about the model trained or uploaded
 if st.session_state.model_scaler_dict:
     st.write("You don't have to load your model, it is already in memory and here is a brief description of it")
-    print(st.session_state.model_scaler_dict)
     if "model" in st.session_state.model_scaler_dict:
         st.write(f"Model used: `{st.session_state.model_scaler_dict["model"]}`")
     
@@ -30,7 +29,6 @@ else:
         
         st.session_state.model_scaler_dict = load_model_dict(uploaded_file=uploaded_model)
 
-print(st.session_state.model_scaler_dict)
 # Simplify the variable
 uploaded_test_file = None
 if "model" in st.session_state.model_scaler_dict and "scaler" in st.session_state.model_scaler_dict:
@@ -60,7 +58,7 @@ if uploaded_test_file:
     
         if df_current.shape == df_future.shape:
 
-            X_train_scaled = scale_X_train(df_future, df_current, selected_variables, scaler)
+            X_train_scaled = scale_X_current(df_future, df_current, selected_variables, scaler)
         else :
             st.warning("The current file you chose does not correspond to the future file in terms of shape  \n\
                     To be able to test your model you need to have both current and future CSV file of the zone")
@@ -84,7 +82,7 @@ if uploaded_test_file:
                 df_future["LST_pred"] = y_train_pred
                 df_future["LST_pred_fut"] = y_pred
                 df_future["Diff_LST"] =  y_pred - y_train_pred
-                print(df_future)
+              
                 st.write("Current LST prediction...")
                 create_raster(df=df_future, variable="LST_pred",map=map)
                 st.write("Future LST prediction...")

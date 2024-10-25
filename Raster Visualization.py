@@ -34,7 +34,7 @@ if uploaded_files:
 
           selected_variable = st.selectbox(label="Chose a variable to observe",options=VARIABLES_LIST)
           if selected_variable:
-              variable, grid_values, transform, complete_path = create_rasters_needs(df,f'{selected_variable}_remake.tif')
+              variable, grid_values, transform, complete_path = create_rasters_needs(df,f'{selected_variable}_remake({np.random.choice(100)}).tif')
               save_and_add_raster_to_map(variable, grid_values, transform, complete_path, map)
 
     map.to_streamlit()
