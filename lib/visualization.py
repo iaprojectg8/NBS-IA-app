@@ -44,7 +44,6 @@ def stat_on_prediction(pred, y_test, threshold, title: str):
    
     # Create the first figure for distribution comparison
     fig1 = go.Figure()
-    print("len_bins",len(bins))
 
     fig1.add_trace(go.Histogram(
         x=pred.flatten(), 
